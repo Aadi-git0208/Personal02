@@ -13,14 +13,12 @@ nav {
   padding: 0 25px;
 }
 
-/* LEFT SIDE (Logo + Name) */
 .navbar-container {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* Logo image */
 .navbar-image {
   width: 42px;
   height: 45px;
@@ -28,7 +26,6 @@ nav {
   border-radius: 6px;
 }
 
-/* Logo text */
 .navbar-logo {
   font-size: 1.8rem;
   font-weight: bold;
@@ -37,13 +34,11 @@ nav {
   white-space: nowrap;
 }
 
-/* RIGHT SIDE (Menu links) */
 .Right-navbar {
   display: flex;
   align-items: center;
 }
 
-/* Navigation links */
 .navbar-links {
   list-style: none;
   display: flex;
@@ -68,13 +63,11 @@ nav {
   color: #000;
 }
 
-/* Login & Register highlight */
 .navbar-links li:last-child a,
 .navbar-links li:nth-last-child(2) a {
   border: 1px solid #00e5ff;
 }
 
-/* Responsive (mobile later) */
 @media (max-width: 900px) {
   .navbar-links {
     display: none;
