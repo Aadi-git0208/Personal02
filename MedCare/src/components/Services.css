@@ -1,0 +1,94 @@
+/* Outer section (page background) */
+.services-section {
+  background-color: black;
+  padding: 80px 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Centered block (LIKE ABOUT SECTION) */
+.services-box {
+  width: 80%;
+  max-width: 1200px;
+  background-color: black;
+  padding: 60px;
+  border-radius: 25px;
+  /* text-align: center; */
+  animation: colorChangeShadow 10s infinite;
+}
+
+/* Heading */
+.services-box h2 {
+  font-size: 4rem;
+  padding-bottom: 30px;
+  margin-top: 8%;
+  background: linear-gradient(90deg, rgb(87, 143, 217) 0%, rgb(144, 165, 206) 25%, rgb(141, 194, 203) 50%, rgb(127, 255, 16) 75%, rgb(30, 255, 0) 100%);
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  animation: textAnimate 10s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  text-align: justify;
+}
+
+/* Grid */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+/* Cards */
+.service-card {
+  background-color: white;
+  padding: 35px 25px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.service-card h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.service-card p {
+  color: #555;
+  font-size: 0.95rem;
+}
+@keyframes colorChangeShadow {
+  0% {
+    box-shadow:  0 15px cadetblue,
+      0 0 30px gray,
+      0 0 45px rebeccapurple,
+      0 0 60px blueviolet;
+  }
+  25% {
+    box-shadow: 0 0 15px greenyellow,
+      0 0 30px violet,
+      0 0 45px purple,
+      0 0 60px paleturquoise;
+  }
+  50% {
+    box-shadow: 0 0 15px cornflowerblue,
+      0 0 30px burlywood,
+      0 0 45px chocolate,
+      0 0 60px orchid;
+  }
+  75% {
+    box-shadow: 0 0 15px crimson,
+      0 0 30px darkorange,
+      0 0 45px gold,
+      0 0 60px yellowgreen;
+  }
+  100% {
+    box-shadow: 0 0 15px cadetblue,
+      0 0 30px gray,
+      0 0 45px rebeccapurple,
+      0 0 60px blueviolet;
+  }
+}

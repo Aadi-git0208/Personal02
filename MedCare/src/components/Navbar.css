@@ -1,6 +1,6 @@
 nav {
   position: fixed;
-  top: 9px;
+  top: 0px;
   left: 9px;
   width: 95.5%;
   z-index: 1000;
@@ -10,7 +10,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 25px;
+  padding: 16px 25px;
 }
 
 .navbar-container {
@@ -20,10 +20,10 @@ nav {
 }
 
 .navbar-image {
-  width: 42px;
-  height: 45px;
+  width: 80px;
+  /* height: 45px; */
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: 30px;
 }
 
 .navbar-logo {
@@ -51,7 +51,7 @@ nav {
 .navbar-links li a {
   text-decoration: none;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: 500;
   padding: 6px 10px;
   transition: all 0.3s ease;

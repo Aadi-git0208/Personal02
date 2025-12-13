@@ -1,4 +1,6 @@
-
+.body{
+  background-color: black;
+}
 .main-home {
   width: 100%;
   height: 100vh;
@@ -55,4 +57,89 @@
   font-size: 1.2rem;
   max-width: 800px;
   line-height: 1.6;
+}
+.About-Section {
+   width: 50%;
+  height: 70vh; 
+  display: flex;
+  /* align-items: center; */
+  padding: 40px;
+  padding-right:225px ;
+  margin-left: 15%;
+  margin-top: 50px;
+  justify-content: center;
+  background-color: black;
+  border-radius: 20px;
+  animation:colorChangeShadow 10s infinite;
+  
+}
+.About-Content{
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.About-Content h2 {
+ font-size: 4rem;
+  padding-bottom: 30px;
+  margin-top: 8%;
+  background: linear-gradient(90deg, rgb(87, 143, 217) 0%, rgb(144, 165, 206) 25%, rgb(141, 194, 203) 50%, rgb(127, 255, 16) 75%, rgb(30, 255, 0) 100%);
+  background-size: 200% auto;
+  color: transparent;
+  background-clip: text;
+  animation: textAnimate 10s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  text-align: justify;
+}
+.About-Content p{
+   font-size: 1.3rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+  color: aliceblue;
+}
+@keyframes colorChangeShadow {
+  0% {
+    box-shadow:
+      0 0 15px cadetblue,
+      0 0 30px gray,
+      0 0 45px rebeccapurple,
+      0 0 60px blueviolet;
+  }
+
+  25% {
+    box-shadow:
+      0 0 15px greenyellow,
+      0 0 30px violet,
+      0 0 45px purple,
+      0 0 60px paleturquoise;
+  }
+
+  50% {
+    box-shadow:
+      0 0 15px cornflowerblue,
+      0 0 30px burlywood,
+      0 0 45px chocolate,
+      0 0 60px orchid;
+  }
+
+  75% {
+    box-shadow:
+      0 0 15px crimson,
+      0 0 30px darkorange,
+      0 0 45px gold,
+      0 0 60px yellowgreen;
+  }
+
+  100% {
+    box-shadow:
+      0 0 15px cadetblue,
+      0 0 30px gray,
+      0 0 45px rebeccapurple,
+      0 0 60px blueviolet;
+  }
+}
+.footer {
+  text-align: center;
+  padding: 20px;
+  background-color:black;
+  color: #10a397;
+  margin-top: 40px;
 }
