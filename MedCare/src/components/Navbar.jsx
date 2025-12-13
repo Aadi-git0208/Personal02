@@ -6,6 +6,8 @@ const Navbar = () =>{
             <div className="navbar-container">
                 <img src="/Medicurex.jpg" alt="MediCurex Logo" className="navbar-image"/>
                 <h1 className="navbar-logo">MediCurex</h1>
+                </div>
+                <div className="Right-navbar">
                 <ul className="navbar-links">
                     <li> 
                         <a href="#">Home</a>

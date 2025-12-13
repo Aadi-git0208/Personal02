@@ -1,47 +1,56 @@
-
 nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+  top: 9px;
+  left: 9px;
+  width: 95.5%;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.868);
+  background: rgba(10, 25, 47, 0.95);
   backdrop-filter: blur(10px);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 25px;
 }
 
+/* LEFT SIDE (Logo + Name) */
 .navbar-container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 15px 25px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
+
+/* Logo image */
 .navbar-image {
   width: 42px;
   height: 45px;
   object-fit: contain;
-  margin-right: 10px;
   border-radius: 6px;
 }
 
-.navbar-container h1 {
-  display: flex;
-  align-items: center;
-}
-
+/* Logo text */
 .navbar-logo {
   font-size: 1.8rem;
   font-weight: bold;
   color: #188f77;
   letter-spacing: 1px;
-  cursor: pointer;
+  white-space: nowrap;
 }
 
+/* RIGHT SIDE (Menu links) */
+.Right-navbar {
+  display: flex;
+  align-items: center;
+}
+
+/* Navigation links */
 .navbar-links {
   list-style: none;
   display: flex;
   gap: 22px;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
 }
 
 .navbar-links li a {
@@ -59,14 +68,15 @@ nav {
   color: #000;
 }
 
+/* Login & Register highlight */
 .navbar-links li:last-child a,
 .navbar-links li:nth-last-child(2) a {
   border: 1px solid #00e5ff;
 }
 
+/* Responsive (mobile later) */
 @media (max-width: 900px) {
   .navbar-links {
-    display: none; 
+    display: none;
   }
 }
-
