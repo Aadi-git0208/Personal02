@@ -1,5 +1,6 @@
 import React from "react";
 import "./Services.css";
+import ServiceCard from "./ui/ServiceCard";
 import {
   FaUserMd,
   FaCalendarCheck,
@@ -10,60 +11,61 @@ import {
 } from "react-icons/fa";
 
 const Services = () => {
+  const services = [
+    {
+      icon: <FaUserMd />,
+      title: "Online Consultation",
+      description: "Consult certified doctors anytime via video or chat.",
+      iconColor: "#0ea5e9"
+    },
+    {
+      icon: <FaCalendarCheck />,
+      title: "Appointment Booking",
+      description: "Book hospital and clinic appointments easily.",
+      iconColor: "#10b981"
+    },
+    {
+      icon: <FaPills />,
+      title: "Medicine Delivery",
+      description: "Order medicines online with doorstep delivery.",
+      iconColor: "#3b82f6"
+    },
+    {
+      icon: <FaVial />,
+      title: "Diagnostic Tests",
+      description: "Book lab tests and access reports digitally.",
+      iconColor: "#8b5cf6"
+    },
+    {
+      icon: <FaFileMedical />,
+      title: "Health Records",
+      description: "Securely store prescriptions and medical history.",
+      iconColor: "#06b6d4"
+    },
+    {
+      icon: <FaAmbulance />,
+      title: "Emergency SOS",
+      description: "One-click emergency assistance and ambulance help.",
+      iconColor: "#ef4444"
+    }
+  ];
+
   return (
     <section className="services-section">
-        <div className="services-box">
-      <h2>Our Services</h2>
-      <div className="services-grid">
-        <div className="service-card">
-          <div className="icon-circle blue">
-            <FaUserMd />
-          </div>
-          <h3>Online Consultation</h3>
-          <p>Consult certified doctors anytime via video or chat.</p>
-        </div>
-
-        <div className="service-card">
-          <div className="icon-circle orange">
-            <FaCalendarCheck />
-          </div>
-          <h3>Appointment Booking</h3>
-          <p>Book hospital and clinic appointments easily.</p>
-        </div>
-
-        <div className="service-card">
-          <div className="icon-circle purple">
-            <FaPills />
-          </div>
-          <h3>Medicine Delivery</h3>
-          <p>Order medicines online with doorstep delivery.</p>
-        </div>
-
-        <div className="service-card">
-          <div className="icon-circle green">
-            <FaVial />
-          </div>
-          <h3>Diagnostic Tests</h3>
-          <p>Book lab tests and access reports digitally.</p>
-        </div>
-
-        <div className="service-card">
-          <div className="icon-circle teal">
-            <FaFileMedical />
-          </div>
-          <h3>Health Records</h3>
-          <p>Securely store prescriptions and medical history.</p>
-        </div>
-
-        <div className="service-card">
-          <div className="icon-circle red">
-            <FaAmbulance />
-          </div>
-          <h3>Emergency SOS</h3>
-          <p>One-click emergency assistance and ambulance help.</p>
+      <div className="services-container">
+        <h2 className="services-title">Our Services</h2>
+        <div className="services-grid">
+          {services.map((service, index) => (
+            <ServiceCard
+              key={index}
+              icon={service.icon}
+              title={service.title}
+              description={service.description}
+              iconColor={service.iconColor}
+            />
+          ))}
         </div>
       </div>
-        </div>
     </section>
   );
 };

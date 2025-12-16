@@ -5,19 +5,20 @@ import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import "./App.css";
 
 function App() {
   return (
-    <div style={{ backgroundColor: "black", minHeight: "100vh", width: "100%" }}>
-    <Router>
-      {/* Navbar visible on all pages */}
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Routes>
-    </Router>
+    <div className="app">
+      <Router>
+        {/* Navbar visible on all pages */}
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </Router>
     </div>
   );
 }
