@@ -14,10 +14,37 @@ function Register() {
 
     if (password !== confirmPassword) {
       alert("Passwords do not match. Please try again.");
-    } else {
-      alert("Registration Successful! You can now Login to MediCurex");
-      navigate("/login");
+      return;
     }
+
+    // Get existing users from localStorage
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+
+    // Check if email already exists
+    const emailExists = users.some((user) => user.email === email);
+    if (emailExists) {
+      alert("Email already registered. Please use a different email or login.");
+      return;
+    }
+
+    // Create new user object
+    const newUser = {
+      id: Date.now().toString(), // Simple ID generation
+      name: name,
+      email: email,
+      password: password,
+      role: "patient", // Default role
+      createdAt: new Date().toISOString(),
+    };
+
+    // Add new user to the users array
+    users.push(newUser);
+
+    // Save updated users array to localStorage
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Registration Successful! You can now Login to MediCurex");
+    navigate("/login");
   }
 
   return (

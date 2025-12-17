@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import BookAppointment from "./pages/patient/BookAppointment";
 import MyAppointment from "./pages/patient/MyAppointment";
+import PatientDashboard from "./pages/patient/PatientDashboard";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 
 import "./App.css";
@@ -21,8 +22,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/patient/dashboard" element={<PatientDashboard />} />
           <Route path="/patient/book-appointment" element={<BookAppointment />} />
-           <Route path="/patient/my-appointment" element={<MyAppointment />} />
+          <Route path="/patient/my-appointment" element={<MyAppointment />} />
           <Route path="/doctor/appointments" element={<DoctorAppointments />} />
 
         </Routes>

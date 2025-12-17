@@ -8,32 +8,44 @@ function Login() {
   const [rememberMe, setRememberMe] = useState(false);
 
   const navigate = useNavigate();
-function handleLogin(e) {
-  e.preventDefault();
 
-  const users = JSON.parse(localStorage.getItem("users")) || [];
+  function handleLogin(e) {
+    e.preventDefault();
 
-  const storedUser = users.find(
-    (user) =>
-      user.username === email &&   // ⬅️ change key if needed
-      user.password === password
-  );
+    const users = JSON.parse(localStorage.getItem("users")) || [];
 
-  if (!storedUser) {
-    alert("Invalid email or password");
-    return;
+    const storedUser = users.find(
+      (user) =>
+        user.email === email &&
+        user.password === password
+    );
+
+    if (!storedUser) {
+      alert("Invalid email or password");
+      return;
+    }
+
+    alert("Login Successful! Welcome to MediCurex");
+
+    if (rememberMe) {
+      localStorage.setItem("isLoggedIn", "true");
+    }
+
+    localStorage.setItem("currentUser", JSON.stringify(storedUser));
+
+    // Dispatch custom event to update navbar
+    window.dispatchEvent(new Event('userLogin'));
+
+    // Navigate based on user role, default to patient dashboard
+    const userRole = storedUser.role || "patient";
+    if (userRole === "doctor") {
+      navigate("/doctor/appointments");
+    } else if (userRole === "admin") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/patient/dashboard");
+    }
   }
-
-  alert("Login Successful! Welcome to MediCurex");
-
-  if (rememberMe) {
-    localStorage.setItem("isLoggedIn", "true");
-  }
-
-  localStorage.setItem("currentUser", JSON.stringify(storedUser));
-
-  navigate("/patient/dashboard");
-}
 
   return (
     <div className="auth-page">
