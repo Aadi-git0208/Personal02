@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Login.css";
 
 function Login() {
@@ -7,15 +7,33 @@ function Login() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
-  function handleLogin(e) {
-    e.preventDefault();
+  const navigate = useNavigate();
+function handleLogin(e) {
+  e.preventDefault();
 
-    if (email === "test@gmail.com" && password === "123456") {
-      alert("Login Successful! Welcome to MediCurex");
-    } else {
-      alert("Account not found. Please register first.");
-    }
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+
+  const storedUser = users.find(
+    (user) =>
+      user.username === email &&   // ⬅️ change key if needed
+      user.password === password
+  );
+
+  if (!storedUser) {
+    alert("Invalid email or password");
+    return;
   }
+
+  alert("Login Successful! Welcome to MediCurex");
+
+  if (rememberMe) {
+    localStorage.setItem("isLoggedIn", "true");
+  }
+
+  localStorage.setItem("currentUser", JSON.stringify(storedUser));
+
+  navigate("/patient/dashboard");
+}
 
   return (
     <div className="auth-page">
@@ -23,13 +41,16 @@ function Login() {
         <div className="auth-header">
           <h2 className="auth-title">Welcome Back</h2>
           <p className="auth-subtitle">
-            Login to continue to <span className="auth-subtitle__brand">MediCurex</span>
+            Login to continue to{" "}
+            <span className="auth-subtitle__brand">MediCurex</span>
           </p>
         </div>
 
         <form className="auth-form" onSubmit={handleLogin}>
           <div className="form-group">
-            <label htmlFor="email" className="form-label">Email Address</label>
+            <label htmlFor="email" className="form-label">
+              Email Address
+            </label>
             <input
               id="email"
               type="email"
@@ -42,7 +63,9 @@ function Login() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password" className="form-label">Password</label>
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -56,15 +79,17 @@ function Login() {
 
           <div className="form-options">
             <label className="checkbox-label">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="checkbox-input"
               />
               <span>Remember me</span>
             </label>
-            <Link to="#" className="form-link">Forgot Password?</Link>
+            <Link to="#" className="form-link">
+              Forgot Password?
+            </Link>
           </div>
 
           <button type="submit" className="auth-button auth-button--primary">
@@ -73,7 +98,10 @@ function Login() {
         </form>
 
         <p className="auth-footer">
-          Don't have an account? <Link to="/register" className="auth-footer__link">Register</Link>
+          Don't have an account?{" "}
+          <Link to="/register" className="auth-footer__link">
+            Register
+          </Link>
         </p>
       </div>
     </div>
