@@ -4,10 +4,12 @@ import "./Register.css";
 
 function Register() {
   const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("patient"); // ✅ NEW
 
   function handleRegister(e) {
     e.preventDefault();
@@ -17,30 +19,24 @@ function Register() {
       return;
     }
 
-    // Get existing users from localStorage
     const users = JSON.parse(localStorage.getItem("users")) || [];
 
-    // Check if email already exists
     const emailExists = users.some((user) => user.email === email);
     if (emailExists) {
       alert("Email already registered. Please use a different email or login.");
       return;
     }
 
-    // Create new user object
     const newUser = {
-      id: Date.now().toString(), // Simple ID generation
+      id: Date.now().toString(),
       name: name,
       email: email,
       password: password,
-      role: "patient", // Default role
+      role: role, 
       createdAt: new Date().toISOString(),
     };
 
-    // Add new user to the users array
     users.push(newUser);
-
-    // Save updated users array to localStorage
     localStorage.setItem("users", JSON.stringify(users));
 
     alert("Registration Successful! You can now Login to MediCurex");
@@ -84,6 +80,21 @@ function Register() {
             />
           </div>
 
+          {/*ROLE SELECTION ADDED */}
+          <div className="form-group">
+            <label className="form-label">Register As</label>
+            <select
+              className="form-input"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              required
+            >
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
           <div className="form-group">
             <label htmlFor="password" className="form-label">Password</label>
             <input
@@ -116,7 +127,10 @@ function Register() {
         </form>
 
         <p className="auth-footer">
-          Already have an account? <Link to="/login" className="auth-footer__link">Login</Link>
+          Already have an account?{" "}
+          <Link to="/login" className="auth-footer__link">
+            Login
+          </Link>
         </p>
       </div>
     </div>
