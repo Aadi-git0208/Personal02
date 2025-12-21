@@ -102,32 +102,34 @@ function BookAppointment() {
   const [slot, setSlot] = useState("");
 
   const confirmAppointment = () => {
-    if (!patientName || !patientAge || !slot) {
-      alert("Please fill all details");
-      return;
-    }
+  if (!patientName || !patientAge || !slot) {
+    alert("Please fill all details");
+    return;
+  }
 
-    const appointment = {
-      id: Date.now(),
-      doctor: selectedDoctor.name,
-      specialization: selectedDoctor.specialization,
-      fee: selectedDoctor.fee,
-      patientName,
-      patientAge,
-      slot,
-      date: new Date().toLocaleDateString(),
-    };
-
-    const existing =
-      JSON.parse(localStorage.getItem("appointments")) || [];
-
-    localStorage.setItem(
-      "appointments",
-      JSON.stringify([...existing, appointment])
-    );
-
-    navigate("/patient/my-appointment");
+  const appointment = {
+    id: Date.now(),
+    doctor: selectedDoctor.name,
+    specialization: selectedDoctor.specialization,
+    fee: selectedDoctor.fee,
+    patientName,
+    patientAge,
+    slot,
+    date: new Date().toLocaleDateString(),
+    status: "pending", 
   };
+
+  const existing =
+    JSON.parse(localStorage.getItem("appointments")) || [];
+
+  localStorage.setItem(
+    "appointments",
+    JSON.stringify([...existing, appointment])
+  );
+
+  navigate("/patient/my-appointment");
+};
+
 
   return (
   <div>

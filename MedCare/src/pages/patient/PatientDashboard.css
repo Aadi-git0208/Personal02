@@ -1,75 +1,108 @@
-/* ===== Base ===== */
+
 body {
   margin: 0;
   font-family: "Segoe UI", sans-serif;
-  background-color: #f4f6f9;
+  background-color:#0d2656;
 }
 
-.top-navbar {
-  height: 64px;
-  background-color: #0d2656;
-  color: white;
+.patient-dashboard {
+  padding: 100px 20px 20px;
+  background:#041025;
+}
+
+.dashboard-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  box-shadow: 0 2px 4px rgba(25, 159, 128, 0.866);
-}
-
-.nav-left {
-  display: flex;
   align-items: center;
-  gap: 600px;
+  margin-bottom: 24px;
 }
 
-.nav-left h2 {
-  color: #38bdf8;
-  font-size: 20px;
-  font-weight: bold;
+.dashboard-header h2 {
+  color: white;
+  font-size: 22px;
+  font-weight: 600;
 }
 
-.nav-left nav {
-  display: flex;
-  gap: 18px;
-}
-
-.nav-left nav a {
-  text-decoration: none;
-  color: #e5e7eb;
-  font-size: 14px;
-  padding: 6px 10px;
-  border-radius: 6px;
-}
-
-.nav-left nav a:hover {
-  background-color: #1e293b;
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.user-name {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.nav-right button {
+.logout-btn {
   background-color: transparent;
   border: 1px solid #ef4444;
   color: #ef4444;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
 }
 
-.nav-right button:hover {
+.logout-btn:hover {
   background-color: #ef4444;
   color: white;
 }
 
-.page-content {
-  padding: 24px;
+.dashboard-boxes {
+  display: flex;
+  gap: 100px;
+  flex-wrap: wrap;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
+
+.dashboard-box {
+  flex: 1;
+  min-width: 220px;
+  max-width: 260px;
+  background: linear-gradient(180deg, #0b2a5a, #061a3a);
+  padding: 22px;
+  border-radius: 16px;
+  text-decoration: none;
+  color: white;
+  box-shadow: 0 10px 25px rgba(12, 192, 144, 0.849);
+  transition: all 0.3s ease;
+}
+
+.dashboard-box:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-box h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.dashboard-box p {
+  font-size: 14px;
+  color:white;
+}
+
+.patient-page-content {
+  margin-top: 30px;
+  padding: 24px;
+  background:#041025;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+/* Appointment card – controlled by YOU */
+.appointment-card {
+  background-color: #0d2656;
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Status colors */
+.appointment-card .status.pending {
+  color: #ffffff;
+  font-size: 17px;
+}
+
+.appointment-card .status.confirmed {
+  color: white;
+  font-size: 17px;
+}
+
+.appointment-card .status.cancelled {
+  color: #ebebeb;
+  font-size: 17px;
+}
+

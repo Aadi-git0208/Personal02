@@ -1,4 +1,16 @@
 /* App Component Styles */
+:root {
+  /* Typography */
+  --font-primary: "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  /* Text colors */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: rgba(255, 255, 255, 0.75);
+
+  /* Line heights */
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+}
 
 .app {
   min-height: 100vh;

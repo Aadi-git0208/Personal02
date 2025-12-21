@@ -1,54 +1,56 @@
 import { useState } from "react";
 import "./ChatWithDoctor.css";
 
+/* Doctor list with IDs (IMPORTANT) */
 const doctors = [
-  "Dr. Peter Doe",
-  "Dr. Sarah William",
-  "Dr. John Smith",
-  "Dr. Nandani Sharma",
-    "Dr. Rahul Verma",
-    "Dr. Anjali Mehta",
-    "Dr. Amit Kapoor",
-    "Dr. Vikram Singh",
-    "Dr. Meera Iyer",
-    "Dr. Karan Malhotra",
+  { id: "d1", name: "Dr. Peter Doe" },
+  { id: "d2", name: "Dr. Sarah William" },
+  { id: "d3", name: "Dr. John Smith" },
+  { id: "d4", name: "Dr. Nandani Sharma" },
 ];
 
 function ChatWithDoctor() {
-  const [selectedDoctor, setSelectedDoctor] = useState("");
+  const patient = JSON.parse(localStorage.getItem("currentUser"));
+
+  const [selectedDoctorId, setSelectedDoctorId] = useState("");
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
 
-  const handleDoctorChange = (e) => {
-    const doctor = e.target.value;
-    setSelectedDoctor(doctor);
+  /* 🔹 Get selected doctor object */
+  const selectedDoctor = doctors.find(
+    (doc) => doc.id === selectedDoctorId
+  );
 
-    if (!doctor) {
-      setMessages([]);
-      return;
-    }
+  /* 🔹 Read ALL chats from localStorage (single source of truth) */
+  const chats = JSON.parse(localStorage.getItem("chats")) || [];
 
-    const savedChat =
-      JSON.parse(localStorage.getItem(`chat_${doctor}`)) || [];
+  /* 🔹 Derive messages (NO useEffect, NO setState) */
+  const messages = selectedDoctor
+    ? chats.filter(
+        (msg) =>
+          msg.patientId === patient.id &&
+          msg.doctorId === selectedDoctor.id
+      )
+    : [];
 
-    setMessages(savedChat);
-  };
-
+  /* 🔹 Send message */
   const sendMessage = () => {
     if (!message.trim() || !selectedDoctor) return;
 
     const newMessage = {
-      text: message,
-      sender: "patient",
+      id: crypto.randomUUID(), 
+      from: "patient",
+      to: "doctor",
+      patientId: patient.id,
+      patientName: patient.name,
+      doctorId: selectedDoctor.id,
+      doctorName: selectedDoctor.name,
+      message: message,
       time: new Date().toLocaleTimeString(),
     };
 
-    const updatedMessages = [...messages, newMessage];
-    setMessages(updatedMessages);
-
     localStorage.setItem(
-      `chat_${selectedDoctor}`,
-      JSON.stringify(updatedMessages)
+      "chats",
+      JSON.stringify([...chats, newMessage])
     );
 
     setMessage("");
@@ -58,21 +60,21 @@ function ChatWithDoctor() {
     <div className="chat-container">
       <h2>Chat with Doctor</h2>
 
-      {/* Doctor Selection */}
+      {/* ===== Doctor Selection ===== */}
       <select
         className="doctor-select"
-        value={selectedDoctor}
-        onChange={handleDoctorChange}
+        value={selectedDoctorId}
+        onChange={(e) => setSelectedDoctorId(e.target.value)}
       >
         <option value="">Select Doctor</option>
-        {doctors.map((doc, index) => (
-          <option key={index} value={doc}>
-            {doc}
+        {doctors.map((doc) => (
+          <option key={doc.id} value={doc.id}>
+            {doc.name}
           </option>
         ))}
       </select>
 
-      {/* Chat Box */}
+      {/* ===== Chat Box ===== */}
       {selectedDoctor && (
         <div className="chat-box">
           <div className="messages">
@@ -80,9 +82,14 @@ function ChatWithDoctor() {
               <p className="empty">No messages yet</p>
             )}
 
-            {messages.map((msg, index) => (
-              <div key={index} className={`message ${msg.sender}`}>
-                <span>{msg.text}</span>
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`message ${
+                  msg.from === "patient" ? "patient" : "doctor"
+                }`}
+              >
+                <span>{msg.message}</span>
                 <small>{msg.time}</small>
               </div>
             ))}

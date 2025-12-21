@@ -3,6 +3,11 @@
 .service-card {
   text-align: center;
   align-items: center;
+
+    /* font-size: 19px;
+    margin-top: 10px;
+    color: #4da3ff; */
+
 }
 
 .service-card__icon-wrapper {
@@ -38,10 +43,11 @@
   line-height: var(--line-height-tight);
 }
 
-.service-card__description {
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  line-height: var(--line-height-relaxed);
+.card.service-card__description {
+  font-size: 19px;
+ color: var(--color-text-secondary, #b0b0b0);
+line-height: var(--line-height-relaxed, 1.6);
+
   margin: 0;
 }
 

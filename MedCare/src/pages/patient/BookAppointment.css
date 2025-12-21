@@ -12,21 +12,22 @@
   box-shadow: 3px solid rgba(25, 159, 128, 0.85);
 }
 
-/* ================= DOCTOR GRID ================= */
 
 .doctor-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 24px;
+  gap: 50px;
 }
 
 .doctor-card {
-  background: #1e293b;
-  border-radius: 14px;
+  background: linear-gradient(180deg, #0b2a5a, #061a3a);
+  border-radius: 20px;
   padding: 20px;
   text-align: center;
   border: 1px solid #334155;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+   box-shadow: 0 10px 25px rgba(12, 192, 144, 0.849);
+   cursor: pointer;
 }
 
 .doctor-card:hover {
@@ -60,8 +61,6 @@
   margin-bottom: 6px;
 }
 
-/* ================= BUTTON ================= */
-
 .doctor-card button {
   margin-top: 14px;
   width: 100%;
@@ -79,7 +78,6 @@
   background-color: #1d4ed8;
 }
 
-/* ================= BOOKING FORM ================= */
 .booking-wrapper {
   display: flex;
   justify-content: center;

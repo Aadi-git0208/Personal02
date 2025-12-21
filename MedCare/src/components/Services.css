@@ -28,6 +28,10 @@
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-xl);
   width: 100%;
+    font-size: 19px;
+    margin-top: 10px;
+    /* color: #4da3ff; */
+
 }
 
 /* Responsive Grid */

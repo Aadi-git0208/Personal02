@@ -1,48 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Navbar.css';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./Navbar.css";
 
 const Navbar = () => {
+  // ✅ Read localStorage ONCE during initialization
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const user = localStorage.getItem("currentUser");
+      return user ? JSON.parse(user) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
-    const user = localStorage.getItem('currentUser');
-    if (user) {
-      try {
-        setCurrentUser(JSON.parse(user));
-      } catch (e) {
-        setCurrentUser(null);
-      }
-    }
-  }, []);
-
-  // Listen for storage changes to update when user logs in/out
-  useEffect(() => {
     const handleStorageChange = () => {
-      const user = localStorage.getItem('currentUser');
-      if (user) {
-        try {
-          setCurrentUser(JSON.parse(user));
-        } catch (e) {
-          setCurrentUser(null);
-        }
-      } else {
+      try {
+        const user = localStorage.getItem("currentUser");
+        setCurrentUser(user ? JSON.parse(user) : null);
+      } catch {
         setCurrentUser(null);
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    // Also listen for custom event for same-tab updates
-    window.addEventListener('userLogin', handleStorageChange);
-    window.addEventListener('userLogout', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("userLogin", handleStorageChange);
+    window.addEventListener("userLogout", handleStorageChange);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('userLogin', handleStorageChange);
-      window.removeEventListener('userLogout', handleStorageChange);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("userLogin", handleStorageChange);
+      window.removeEventListener("userLogout", handleStorageChange);
     };
   }, []);
 
@@ -55,36 +46,53 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("isLoggedIn");
     setCurrentUser(null);
-    window.dispatchEvent(new Event('userLogout'));
-    navigate('/');
+    window.dispatchEvent(new Event("userLogout"));
+    navigate("/");
     closeMobileMenu();
   };
 
   const getInitials = (name) => {
-    if (!name) return 'U';
-    const names = name.trim().split(' ');
-    if (names.length === 1) {
-      return names[0].charAt(0).toUpperCase();
-    }
-    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+    if (!name) return "U";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
+  // ✅ NEW: redirect user to dashboard when clicking name
+const goToDashboard = () => {
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (!user) return;
+
+  if (user.role === "patient") {
+    navigate("/patient");
+  } else if (user.role === "doctor") {
+    navigate("/doctor");
+  } else {
+    navigate("/");
+  }
+
+  closeMobileMenu();
+};
+
 
   return (
     <nav className="navbar">
       <div className="navbar__container">
-        <div className="navbar__brand">
+
+        {/* ✅ Clickable Logo → Home */}
+        <Link to="/" className="navbar__brand" onClick={closeMobileMenu}>
           <img
             src="/Medicurex.jpg"
             alt="MediCurex Logo"
             className="navbar__logo-image"
           />
           <h1 className="navbar__logo-text">MediCurex</h1>
-        </div>
+        </Link>
 
-        <button 
+        <button
           className="navbar__mobile-toggle"
           onClick={toggleMobileMenu}
           aria-label="Toggle menu"
@@ -95,39 +103,45 @@ const Navbar = () => {
           <span className="navbar__mobile-toggle-icon"></span>
         </button>
 
-        <div className={`navbar__menu ${isMobileMenuOpen ? 'navbar__menu--open' : ''}`}>
+        <div className={`navbar__menu ${isMobileMenuOpen ? "navbar__menu--open" : ""}`}>
           <ul className="navbar__links">
             <li className="navbar__item">
               <Link to="/" className="navbar__link" onClick={closeMobileMenu}>Home</Link>
             </li>
+
             <li className="navbar__item">
               <Link to="/services" className="navbar__link" onClick={closeMobileMenu}>Services</Link>
             </li>
+
             <li className="navbar__item">
               <Link to="/medicine" className="navbar__link" onClick={closeMobileMenu}>Medicine</Link>
             </li>
-            <li className="navbar__item">
-              <Link to="/doctor" className="navbar__link" onClick={closeMobileMenu}>Doctor</Link>
-            </li>
+            
             <li className="navbar__item">
               <Link to="/contact" className="navbar__link" onClick={closeMobileMenu}>Contact</Link>
             </li>
+
             {currentUser ? (
               <>
                 <li className="navbar__item navbar__item--user">
                   <div className="navbar__user-info">
-                    <div className="navbar__user-initials" title={currentUser.name || currentUser.email}>
+                    <div className="navbar__user-initials">
                       {getInitials(currentUser.name || currentUser.email)}
                     </div>
-                    <span className="navbar__user-name">{currentUser.name || currentUser.email}</span>
+                    <span
+                        className="navbar__user-name"
+                        onClick={goToDashboard}
+                        style={{ cursor: "pointer" }}
+                        title="Go to Dashboard"
+                      >
+                        {currentUser.name || currentUser.email}
+                      </span>
+
                   </div>
                 </li>
+
                 <li className="navbar__item navbar__item--action">
-                  <button 
-                    className="navbar__logout-button" 
-                    onClick={handleLogout}
-                    aria-label="Logout"
-                  >
+                  <button className="navbar__logout-button" onClick={handleLogout}>
                     Logout
                   </button>
                 </li>
@@ -135,10 +149,15 @@ const Navbar = () => {
             ) : (
               <>
                 <li className="navbar__item navbar__item--action">
-                  <Link to="/login" className="navbar__link navbar__link--primary" onClick={closeMobileMenu}>Login</Link>
+                  <Link to="/login" className="navbar__link navbar__link--primary" onClick={closeMobileMenu}>
+                    Login
+                  </Link>
                 </li>
+
                 <li className="navbar__item navbar__item--action">
-                  <Link to="/register" className="navbar__link navbar__link--secondary" onClick={closeMobileMenu}>Register</Link>
+                  <Link to="/register" className="navbar__link navbar__link--secondary" onClick={closeMobileMenu}>
+                    Register
+                  </Link>
                 </li>
               </>
             )}

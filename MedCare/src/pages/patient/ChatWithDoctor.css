@@ -10,10 +10,11 @@
   margin: 16px 0;
   border-radius: 6px;
   border: none;
+  cursor: pointer;
 }
 
 .chat-box {
-  background: #1e293b;
+  background: linear-gradient(180deg, #0b2a5a, #061a3a);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -24,6 +25,7 @@
   flex: 1;
   padding: 16px;
   overflow-y: auto;
+ 
 }
 
 .message {
