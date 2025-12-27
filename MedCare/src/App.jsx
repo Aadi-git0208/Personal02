@@ -20,7 +20,16 @@ import DoctorChat from "./pages/doctor/DoctorChat";
 import PatientList from "./pages/doctor/PatientList";
 import WritePrescription from "./pages/doctor/WritePrescription";
 import DoctorLogin from "./pages/doctor/DoctorLogin";
-
+import MedicineDashboard from "./components/MedicineDashboard";
+//Admin
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+// import ManageDoctor from "./pages/admin/ManageDoctor";
+import ManageUsers from "./pages/admin/ManageUsers";
+import Orders from "./pages/admin/Orders";
+import Reports from "./pages/admin/Reports";
+import ManageMedicines from "./pages/admin/ManageMedicines";
+import Cart from "./components/cart"; 
 
 function App() {
   return (
@@ -33,15 +42,17 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+          <Route path="/medicine" element={<MedicineDashboard />} />
+          <Route path="/cart" element={<cart/>}/>
 
         {/* ===== PATIENT ===== */}
-        <Route path="/patient" element={<PatientDashboard />}>
-          <Route index element={<BookAppointment />} />
-          <Route path="dashboard" element={<BookAppointment />} />
-          <Route path="book-appointment" element={<BookAppointment />} />
-          <Route path="my-appointment" element={<MyAppointment />} />
-          <Route path="chat" element={<ChatWithDoctor />} />
-        </Route>
+       <Route path="/patient" element={<PatientDashboard />}>
+  <Route index element={<BookAppointment />} />
+  <Route path="dashboard" element={<BookAppointment />} />
+  <Route path="book-appointment" element={<BookAppointment />} />
+  <Route path="my-appointment" element={<MyAppointment />} />
+  <Route path="chat" element={<ChatWithDoctor />} />
+</Route>
 
         {/* ===== DOCTOR ===== */}
         <Route path="/doctor" element={<DoctorDashboard />}>
@@ -51,7 +62,18 @@ function App() {
           <Route path="patients" element={<PatientList />} />
           <Route path="prescription" element={<WritePrescription />} />
           <Route path="login" element={<DoctorLogin />} />
-        </Route>
+          </Route>
+      <Route path="/admin" element={<AdminLayout />}>
+  <Route index element={<AdminDashboard />} />
+  <Route path="dashboard" element={<AdminDashboard />} />
+  <Route path="users" element={<ManageUsers />} />
+  {/* <Route path="doctors" element={<ManageDoctor />} /> */}
+  <Route path="medicines" element={<ManageMedicines />} />
+  <Route path="orders" element={<Orders />} />
+  <Route path="reports" element={<Reports />} />
+</Route>
+
+
       </Routes>
     </Router>
   );

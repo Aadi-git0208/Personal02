@@ -142,6 +142,8 @@ h1 {
 h2 {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
+  color: #c06bdb;
+  font-family: "Playfair Display", serif;
 }
 
 h3 {

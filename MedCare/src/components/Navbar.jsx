@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = () => {
-  // ✅ Read localStorage ONCE during initialization
+
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const user = localStorage.getItem("currentUser");
@@ -60,7 +60,7 @@ const Navbar = () => {
     if (parts.length === 1) return parts[0][0].toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
-  // ✅ NEW: redirect user to dashboard when clicking name
+  
 const goToDashboard = () => {
   const user = JSON.parse(localStorage.getItem("currentUser"));
 
@@ -82,7 +82,6 @@ const goToDashboard = () => {
     <nav className="navbar">
       <div className="navbar__container">
 
-        {/* ✅ Clickable Logo → Home */}
         <Link to="/" className="navbar__brand" onClick={closeMobileMenu}>
           <img
             src="/Medicurex.jpg"
