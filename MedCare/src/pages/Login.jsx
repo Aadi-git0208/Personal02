@@ -39,7 +39,17 @@ function Login() {
     // Navigate based on user role, default to patient dashboard
     const userRole = storedUser.role || "patient";
     if (userRole === "doctor") {
-      navigate("/doctor/appointments");
+      // Check if doctor has completed profile
+      const doctorProfiles = JSON.parse(localStorage.getItem("doctorProfiles")) || [];
+      const hasProfile = doctorProfiles.some(
+        (profile) => profile.id === storedUser.id || profile.userId === storedUser.id
+      );
+      
+      if (!hasProfile) {
+        navigate("/doctor/onboarding");
+      } else {
+        navigate("/doctor");
+      }
     } else if (userRole === "admin") {
       navigate("/admin/dashboard");
     } else {

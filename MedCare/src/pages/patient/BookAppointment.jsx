@@ -1,89 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./BookAppointment.css";
-
-const doctors = [
-  {
-    id: 1,
-    name: "Dr. Peter Doe",
-    specialization: "Dentist",
-    experience: "13 Years",
-    fee: 500,
-    image: "https://i.pravatar.cc/150?img=11",
-  },
-  {
-    id: 2,
-    name: "Dr. Sarah William",
-    specialization: "Orthodontist",
-    experience: "8 Years",
-    fee: 800,
-    image: "https://i.pravatar.cc/150?img=32",
-  },
-  {
-    id: 3,
-    name: "Dr. John Smith",
-    specialization: "Cardiologist",
-    experience: "10 Years",
-    fee: 1000,
-    image: "https://i.pravatar.cc/150?img=45",
-  },
-  {
-    id: 4,
-    name: "Dr. Nandani Sharma",
-    specialization: "Surgeon",
-    experience: "5 Years",
-    fee: 1200,
-    image: "/Nandani.jpg",
-  },
-  {
-    id: 5,
-    name: "Dr. Rahul Verma",
-    specialization: "General Physician",
-    experience: "7 Years",
-    fee: 400,
-    image: "/Rahul.jpg",
-  },
-  {
-    id: 6,
-    name: "Dr. Anjali Mehta",
-    specialization: "Gynecologist",
-    experience: "9 Years",
-    fee: 900,
-    image: "/Anjali.jpg",
-  },
-  {
-    id: 7,
-    name: "Dr. Amit Kapoor",
-    specialization: "Neurologist",
-    experience: "12 Years",
-    fee: 1500,
-    image: "/Amit.jpg",
-  },
-  {
-    id: 8,
-    name: "Dr. Priya Sharma",
-    specialization: "Dermatologist",
-    experience: "6 Years",
-    fee: 700,
-    image: "/Priya.jpg",
-  },
-  {
-    id: 9,
-    name: "Dr. Rakesh Iyer",
-    specialization: "Orthopedic",
-    experience: "11 Years",
-    fee: 1100,
-    image: "/Rakesh.jpg",
-  },
-  {
-    id: 10,
-    name: "Dr. Sneha Kulkarni",
-    specialization: "Pediatrician",
-    experience: "8 Years",
-    fee: 600,
-    image: "/Sneha.jpg",
-  },
-];
 
 const timeSlots = [
   "10:00 AM",
@@ -95,40 +12,79 @@ const timeSlots = [
 
 function BookAppointment() {
   const navigate = useNavigate();
+  const patient = JSON.parse(localStorage.getItem("currentUser")) || {};
 
+  const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [patientName, setPatientName] = useState("");
+  const [patientName, setPatientName] = useState(patient.name || "");
   const [patientAge, setPatientAge] = useState("");
   const [slot, setSlot] = useState("");
 
+  // Load doctors from doctor profiles
+  useEffect(() => {
+    const loadDoctors = () => {
+      try {
+        const doctorProfiles = JSON.parse(localStorage.getItem("doctorProfiles")) || [];
+        setDoctors(doctorProfiles);
+      } catch (err) {
+        console.error("Error loading doctors:", err);
+      }
+    };
+
+    loadDoctors();
+
+    // Listen for updates
+    const interval = setInterval(loadDoctors, 1000);
+    window.addEventListener("storage", loadDoctors);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", loadDoctors);
+    };
+  }, []);
+
   const confirmAppointment = () => {
-  if (!patientName || !patientAge || !slot) {
-    alert("Please fill all details");
-    return;
-  }
+    if (!patientName || !patientAge || !slot) {
+      alert("Please fill all details");
+      return;
+    }
 
-  const appointment = {
-    id: Date.now(),
-    doctor: selectedDoctor.name,
-    specialization: selectedDoctor.specialization,
-    fee: selectedDoctor.fee,
-    patientName,
-    patientAge,
-    slot,
-    date: new Date().toLocaleDateString(),
-    status: "pending", 
+    if (!patient?.id) {
+      alert("Please login to book appointment");
+      navigate("/login");
+      return;
+    }
+
+    const appointment = {
+      id: Date.now().toString(),
+      appointmentId: Date.now().toString(),
+      doctorId: selectedDoctor.id,
+      doctorUserId: selectedDoctor.userId,
+      doctorName: selectedDoctor.name,
+      doctorEmail: selectedDoctor.email,
+      specialization: selectedDoctor.specialization,
+      fee: selectedDoctor.fee,
+      patientId: patient.id,
+      patientName: patientName,
+      patientAge: patientAge,
+      slot: slot,
+      time: slot,
+      date: new Date().toLocaleDateString(),
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    };
+
+    const existing =
+      JSON.parse(localStorage.getItem("appointments")) || [];
+
+    localStorage.setItem(
+      "appointments",
+      JSON.stringify([...existing, appointment])
+    );
+
+    alert("Appointment booked successfully!");
+    navigate("/patient/my-appointment");
   };
-
-  const existing =
-    JSON.parse(localStorage.getItem("appointments")) || [];
-
-  localStorage.setItem(
-    "appointments",
-    JSON.stringify([...existing, appointment])
-  );
-
-  navigate("/patient/my-appointment");
-};
 
 
   return (
@@ -137,21 +93,56 @@ function BookAppointment() {
 
     {/* DOCTOR LIST */}
     {!selectedDoctor && (
-      <div className="doctor-grid">
-        {doctors.map((doc) => (
-          <div className="doctor-card" key={doc.id}>
-            <img src={doc.image} alt={doc.name} />
-            <h3>{doc.name}</h3>
-            <p className="specialization">{doc.specialization}</p>
-            <p className="info">Experience: {doc.experience}</p>
-            <p className="info">Fee: ₹{doc.fee}</p>
-
-            <button onClick={() => setSelectedDoctor(doc)}>
-              Book Appointment
-            </button>
+      <>
+        {doctors.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "40px" }}>
+            <p style={{ fontSize: "18px", opacity: 0.7 }}>
+              No doctors available at the moment.
+            </p>
+            <p style={{ fontSize: "14px", opacity: 0.5, marginTop: "10px" }}>
+              Please check back later.
+            </p>
           </div>
-        ))}
-      </div>
+        ) : (
+          <div className="doctor-grid">
+            {doctors.map((doc) => (
+              <div className="doctor-card" key={doc.id}>
+                {doc.image ? (
+                  <img src={doc.image} alt={doc.name} />
+                ) : (
+                  <div
+                    style={{
+                      width: "100px",
+                      height: "100px",
+                      borderRadius: "50%",
+                      background: "#ddd",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto",
+                    }}
+                  >
+                    {doc.name.charAt(0)}
+                  </div>
+                )}
+                <h3>{doc.name}</h3>
+                <p className="specialization">{doc.specialization}</p>
+                <p className="info">Experience: {doc.experience}</p>
+                <p className="info">Fee: ₹{doc.fee}</p>
+                {doc.timeSlots && doc.timeSlots.length > 0 && (
+                  <p className="info" style={{ fontSize: "12px" }}>
+                    Available: {doc.timeSlots.join(", ")}
+                  </p>
+                )}
+
+                <button onClick={() => setSelectedDoctor(doc)}>
+                  Book Appointment
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
     )}
 
     {/* BOOKING FORM (CENTERED) */}
@@ -176,11 +167,17 @@ function BookAppointment() {
 
           <select value={slot} onChange={(e) => setSlot(e.target.value)}>
             <option value="">Select Time Slot</option>
-            {timeSlots.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
+            {selectedDoctor?.timeSlots && selectedDoctor.timeSlots.length > 0
+              ? selectedDoctor.timeSlots.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))
+              : timeSlots.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
           </select>
 
           <button onClick={confirmAppointment}>

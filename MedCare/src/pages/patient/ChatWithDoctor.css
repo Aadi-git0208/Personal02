@@ -25,32 +25,67 @@
   flex: 1;
   padding: 16px;
   overflow-y: auto;
- 
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .message {
-  margin-bottom: 10px;
+  margin-bottom: 0;
   max-width: 70%;
-  padding: 8px 12px;
-  border-radius: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
   font-size: 14px;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Patient messages (sent) - Right side */
 .message.patient {
-  background-color: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
   align-self: flex-end;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
 }
 
+/* Doctor messages (received) - Left side */
 .message.doctor {
-  background-color: #334155;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
   align-self: flex-start;
+  margin-right: auto;
+  border-bottom-left-radius: 4px;
+}
+
+.message span {
+  display: block;
+  line-height: 1.4;
 }
 
 .message small {
   display: block;
   font-size: 10px;
   opacity: 0.7;
-  margin-top: 4px;
+  margin-top: 6px;
+  text-align: right;
+}
+
+.message.doctor small {
+  text-align: left;
 }
 
 .chat-input {

@@ -17,9 +17,6 @@ function PatientDashboard() {
       <section className="patient-dashboard">
         <div className="dashboard-header">
           <h2>Welcome, {user?.name || "Patient"}</h2>
-          <button className="logout-btn" onClick={logout}>
-            Logout
-          </button>
         </div>
 
         <div className="dashboard-boxes">

@@ -70,6 +70,8 @@ const goToDashboard = () => {
     navigate("/patient");
   } else if (user.role === "doctor") {
     navigate("/doctor");
+  } else if (user.role === "admin") {
+    navigate("/admin/dashboard");
   } else {
     navigate("/");
   }

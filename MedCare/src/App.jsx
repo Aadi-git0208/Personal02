@@ -12,6 +12,7 @@ import PatientDashboard from "./pages/patient/PatientDashboard";
 import BookAppointment from "./pages/patient/BookAppointment";
 import MyAppointment from "./pages/patient/MyAppointment";
 import ChatWithDoctor from "./pages/patient/ChatWithDoctor";
+import Pharmacy from "./pages/patient/Pharmacy";
 
 // Doctor
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
@@ -20,6 +21,7 @@ import DoctorChat from "./pages/doctor/DoctorChat";
 import PatientList from "./pages/doctor/PatientList";
 import WritePrescription from "./pages/doctor/WritePrescription";
 import DoctorLogin from "./pages/doctor/DoctorLogin";
+import DoctorOnboarding from "./pages/doctor/DoctorOnboarding";
 import MedicineDashboard from "./components/MedicineDashboard";
 //Admin
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -52,6 +54,7 @@ function App() {
   <Route path="book-appointment" element={<BookAppointment />} />
   <Route path="my-appointment" element={<MyAppointment />} />
   <Route path="chat" element={<ChatWithDoctor />} />
+  <Route path="pharmacy" element={<Pharmacy />} />
 </Route>
 
         {/* ===== DOCTOR ===== */}
@@ -62,7 +65,8 @@ function App() {
           <Route path="patients" element={<PatientList />} />
           <Route path="prescription" element={<WritePrescription />} />
           <Route path="login" element={<DoctorLogin />} />
-          </Route>
+        </Route>
+        <Route path="/doctor/onboarding" element={<DoctorOnboarding />} />
       <Route path="/admin" element={<AdminLayout />}>
   <Route index element={<AdminDashboard />} />
   <Route path="dashboard" element={<AdminDashboard />} />
