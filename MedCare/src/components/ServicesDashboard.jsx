@@ -1,5 +1,5 @@
 import React from "react";
-import "./Services.css";
+import "./ServicesDashboard.css";
 import ServiceCard from "./ui/ServiceCard";
 import {
   FaUserMd,

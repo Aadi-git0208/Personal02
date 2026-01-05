@@ -7,31 +7,29 @@ const MedicineDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("currentUser"));
 
-  /* ===== MEDICINES ===== */
   const [medicines, setMedicines] = useState(() => {
     const stored = JSON.parse(localStorage.getItem("medicines"));
-    if (stored && stored.length > 0) return stored;
-    return [];
+    return stored && stored.length > 0 ? stored : [];
   });
 
-  // Refresh medicines when localStorage changes
+  const [cart, setCart] = useState(() => {
+    return JSON.parse(localStorage.getItem("cart")) || [];
+  });
+
+  const [search, setSearch] = useState("");
+
   useEffect(() => {
     const loadMedicines = () => {
       try {
         const stored = JSON.parse(localStorage.getItem("medicines")) || [];
         setMedicines(stored);
       } catch (err) {
-        console.error("Error loading medicines:", err);
+        console.error(err);
       }
     };
 
-    // Load initially
     loadMedicines();
-
-    // Listen for storage events
     window.addEventListener("storage", loadMedicines);
-
-    // Check periodically for updates
     const interval = setInterval(loadMedicines, 1000);
 
     return () => {
@@ -40,16 +38,10 @@ const MedicineDashboard = () => {
     };
   }, []);
 
-  /* ===== CART ===== */
-  const [cart, setCart] = useState(() => {
-    return JSON.parse(localStorage.getItem("cart")) || [];
-  });
-
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  /* ===== ADD TO CART ===== */
   const handleAddToCart = (medicine, quantity = 1) => {
     if (!user) {
       alert("Please login to buy medicines");
@@ -62,79 +54,71 @@ const MedicineDashboard = () => {
       return;
     }
 
-    setCart((prevCart) => {
-      const exists = prevCart.find((item) => item.id === medicine.id);
-
+    setCart(prev => {
+      const exists = prev.find(item => item.id === medicine.id);
       if (exists) {
-        return prevCart.map((item) =>
+        return prev.map(item =>
           item.id === medicine.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-
-      return [...prevCart, { ...medicine, quantity: quantity }];
+      return [...prev, { ...medicine, quantity }];
     });
   };
 
-  /* ===== TOTAL ===== */
-  const totalAmount = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
+  const handleBuyNow = (medicine) => {
+    handleAddToCart(medicine, 1);
+    navigate("/cart");
+  };
+
+  const filteredMedicines = medicines.filter(m =>
+    m.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="medicine-page">
       <h1 className="medicine-title">Medicines</h1>
 
-      {/* ===== AVAILABLE MEDICINES ONLY ===== */}
+      <div className="medicine-top-bar">
+        <input
+          type="text"
+          placeholder="Search medicines..."
+          className="medicine-search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <div
+          className="medicine-cart-btn"
+          onClick={() => navigate("/cart")}
+        >
+          🛒 Cart
+        </div>
+      </div>
+
       <h2>Available Medicines</h2>
 
-      {medicines.length === 0 ? (
+      {filteredMedicines.length === 0 ? (
         <div style={{ textAlign: "center", padding: "60px 20px" }}>
-          <p style={{ fontSize: "18px", opacity: 0.7, marginBottom: "20px" }}>
-            No medicines available at the moment.
-          </p>
-          <p style={{ fontSize: "14px", opacity: 0.5 }}>
-            Please check back later or contact the administrator.
+          <p style={{ fontSize: "18px", opacity: 0.7 }}>
+            No medicines available
           </p>
         </div>
       ) : (
         <div className="medicine-grid-vertical">
-          {medicines.map((med) => (
+          {filteredMedicines.map((med) => (
             <MedicineCard
               key={med.id}
               medicine={med}
               onAddToCart={handleAddToCart}
-              showAddToCart={true}
+              onBuyNow={handleBuyNow}
               userRole={user?.role || null}
             />
           ))}
         </div>
       )}
 
-      {/* ===== CART (PATIENT ONLY) ===== */}
-      {user?.role === "patient" && (
-        <div className="cart-section">
-          <h2>Your Cart</h2>
-
-          {cart.length === 0 ? (
-            <p>Cart is empty</p>
-          ) : (
-            <>
-              {cart.map((item) => (
-                <div className="cart-item" key={item.id}>
-                  {item.name} × {item.quantity} = ₹
-                  {item.price * item.quantity}
-                </div>
-              ))}
-              <div className="cart-total">
-                Total: ₹{totalAmount}
-              </div>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 };

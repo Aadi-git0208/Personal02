@@ -31,7 +31,12 @@ import ManageUsers from "./pages/admin/ManageUsers";
 import Orders from "./pages/admin/Orders";
 import Reports from "./pages/admin/Reports";
 import ManageMedicines from "./pages/admin/ManageMedicines";
-import Cart from "./components/cart"; 
+import Cart from "./components/Cart"; 
+import Services from "./components/Service/ServiceSection.jsx";
+import "./components/Service/leafletFix.js";
+import NearbyHospitals from "./components/Service/NearbyHospitals.jsx";
+
+
 
 function App() {
   return (
@@ -45,17 +50,21 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
           <Route path="/medicine" element={<MedicineDashboard />} />
-          <Route path="/cart" element={<cart/>}/>
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/nearby-hospitals" element={<NearbyHospitals />} />
 
-        {/* ===== PATIENT ===== */}
-       <Route path="/patient" element={<PatientDashboard />}>
+       {/* ===== PATIENT ===== */}
+<Route path="/patient" element={<PatientDashboard />}>
   <Route index element={<BookAppointment />} />
   <Route path="dashboard" element={<BookAppointment />} />
+ 
   <Route path="book-appointment" element={<BookAppointment />} />
   <Route path="my-appointment" element={<MyAppointment />} />
   <Route path="chat" element={<ChatWithDoctor />} />
   <Route path="pharmacy" element={<Pharmacy />} />
 </Route>
+
 
         {/* ===== DOCTOR ===== */}
         <Route path="/doctor" element={<DoctorDashboard />}>
