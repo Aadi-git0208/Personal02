@@ -12,7 +12,6 @@ const DoctorDashboard = () => {
   const doctor =
     JSON.parse(localStorage.getItem("currentUser")) || {};
 
-  // Filter appointments for this doctor
   const appointments = allAppointments.filter(
     (app) =>
       app.doctorId === doctor.id ||
@@ -27,14 +26,15 @@ const DoctorDashboard = () => {
     }
   }, [doctor?.name, navigate]);
 
-  // Check if we're on a child route (not the main dashboard)
-  const isChildRoute = location.pathname !== '/doctor' && location.pathname !== '/doctor/';
+  const isChildRoute =
+    location.pathname !== "/doctor" &&
+    location.pathname !== "/doctor/";
 
   const pending = appointments.filter(a => a.status === "pending");
   const confirmed = appointments.filter(a => a.status === "confirmed");
 
   const updateStatus = (id, status) => {
-    const updated = appointments.map(app =>
+    const updated = allAppointments.map(app =>
       app.id === id ? { ...app, status } : app
     );
 
@@ -42,36 +42,38 @@ const DoctorDashboard = () => {
     window.location.reload();
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    navigate("/doctor/login");
-  };
-
-
   return (
     <div className="doctor-dashboard no-sidebar">
-      {/* Only show dashboard content if we're on the main dashboard route */}
+
       {!isChildRoute && (
         <main className="main-content">
-          {/* ===== HEADER ===== */}
-          <h1>
-            Welcome, {doctor?.name || "Doctor"} 👨‍⚕️
-          </h1>
+
+          {/* HEADER */}
+          <h1>Welcome, {doctor?.name || "Doctor"} 👨‍⚕️</h1>
           <p className="subtitle">Here is your daily overview</p>
 
-          {/* ===== FEATURE CARDS ===== */}
+          {/* FEATURE CARDS */}
           <div className="feature-grid">
-            <div className="feature-card active">
-              <h3>📅 Book Appointment</h3>
-              <p>Find doctors & book appointments</p>
+
+            {/* ✅ PRESCRIPTION CARD FIXED */}
+            <div
+              className="feature-card active"
+              onClick={() => navigate("/doctor/prescription")}
+              style={{ cursor: "pointer" }}
+            >
+              <h3>📄 Prescription</h3>
+              <p>Write the prescription for patients</p>
             </div>
 
-            <div className="feature-card">
-              <h3>🗂 My Appointments</h3>
-              <p>View appointment history</p>
+            <div
+              className="feature-card"
+              onClick={() => navigate("/doctor/patients")}
+              style={{ cursor: "pointer" }}
+            >
+              <h3>👥 My Patients</h3>
+              <p>View patient profiles</p>
             </div>
 
-            {/* ✅ CLICKABLE MESSAGES CARD */}
             <Link to="chat" className="feature-card">
               <h3>💬 Messages</h3>
               <p>Patients Interaction</p>
@@ -81,9 +83,10 @@ const DoctorDashboard = () => {
               <h3>💊 Pharmacy</h3>
               <p>Order medicines online</p>
             </div>
+
           </div>
 
-          {/* ===== STATS ===== */}
+          {/* STATS */}
           <div className="stats">
             <div className="card">
               <h3>Total Appointments</h3>
@@ -99,7 +102,7 @@ const DoctorDashboard = () => {
             </div>
           </div>
 
-          {/* ===== RECENT APPOINTMENTS ===== */}
+          {/* RECENT APPOINTMENTS */}
           <div className="table-card">
             <h2>Recent Appointments</h2>
 
@@ -155,11 +158,13 @@ const DoctorDashboard = () => {
               </table>
             )}
           </div>
+
         </main>
       )}
 
-      {/* Render child routes (chat, appointments, etc.) */}
+      {/* REQUIRED for nested routes */}
       <Outlet />
+
     </div>
   );
 };

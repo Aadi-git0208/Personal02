@@ -7,12 +7,15 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+
+
 // Patient
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import BookAppointment from "./pages/patient/BookAppointment";
 import MyAppointment from "./pages/patient/MyAppointment";
 import ChatWithDoctor from "./pages/patient/ChatWithDoctor";
 import Pharmacy from "./pages/patient/Pharmacy";
+import Prescription from "./pages/patient/Prescription";
 
 // Doctor
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
@@ -63,6 +66,7 @@ function App() {
   <Route path="my-appointment" element={<MyAppointment />} />
   <Route path="chat" element={<ChatWithDoctor />} />
   <Route path="pharmacy" element={<Pharmacy />} />
+  <Route path="prescription" element={<Prescription />} />
 </Route>
 
 

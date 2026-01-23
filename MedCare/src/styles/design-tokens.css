@@ -137,6 +137,13 @@ h1, h2, h3, h4, h5, h6 {
 h1 {
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-bold);
+  margin-top: 69px;
+}
+.cart-title {
+  color: linear-gradient(45deg, #0cafea, #00ffb3);
+  font-family: "Playfair Display", serif;
+  background:linear-gradient(45deg, #0cafea, #00ffb3);
+  align-items: center;
 }
 
 h2 {

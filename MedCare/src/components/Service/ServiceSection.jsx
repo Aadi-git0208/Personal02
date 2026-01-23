@@ -18,18 +18,6 @@ const Services = () => {
           <h3>Nearby Hospitals</h3>
           <p>Find hospitals near you in real time</p>
         </div>
-
-        <div className="service-card">
-          💊
-          <h3>Buy Medicines</h3>
-          <p>Order medicines online</p>
-        </div>
-
-        <div className="service-card">
-          📅
-          <h3>Book Appointment</h3>
-          <p>Schedule doctor visits</p>
-        </div>
       </div>
     </div>
   );
