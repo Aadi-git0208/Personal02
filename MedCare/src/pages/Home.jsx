@@ -1,8 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Home.css';
-import Services from '../components/ServicesDashboard';  
+import Services from '../components/ServicesDashboard';
 
 const Home = () => {
+
+    const aboutImages = [
+    "/About-Section-img.jpg",
+    "/Rahul.jpg",
+    "/Rakesh.jpg",
+    "/Nandani.jpg",
+    "/Sneha.jpg"
+];
+
+const [currentImage, setCurrentImage] = useState(0);
+
+useEffect(() => {
+    const timer = setInterval(() => {
+        setCurrentImage((prev) => (prev + 1) % aboutImages.length);
+    }, 3000);
+
+    return () => clearInterval(timer);
+}, []);
+
   return (
     <>
       <section className="hero-section">
@@ -22,11 +41,18 @@ const Home = () => {
       </section>
       
       <section className="about-section">
+             <h2 className="about-title">About Us</h2>
+      
         <div className="about-container">
-          <h2 className="about-title">About Us</h2>
+          
           <p className="about-description">
             At MediCurex, we are dedicated to revolutionizing healthcare by leveraging technology to provide seamless access to medical services. Our platform is designed to bridge the gap between patients and healthcare providers, ensuring that quality care is just a click away. Whether you need to consult with a specialist, manage your health records, or order medications, MediCurex is here to make healthcare more accessible and efficient for everyone.
           </p>
+           <img
+    key={currentImage}
+    src={aboutImages[currentImage]}
+    alt="About MediCurex"
+    className="about-image"/>
         </div>
       </section>
       

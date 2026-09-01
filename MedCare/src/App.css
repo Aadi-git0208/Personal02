@@ -1,22 +1,139 @@
-/* App Component Styles */
-:root {
-  /* Typography */
-  --font-primary: "Segoe UI", system-ui, -apple-system, sans-serif;
+/* =========================
+   App Component Styles
+   ========================= */
 
-  /* Text colors */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: rgba(255, 255, 255, 0.75);
 
-  /* Line heights */
-  --line-height-normal: 1.4;
-  --line-height-relaxed: 1.6;
+/* =========================
+   Dark Mode
+   ========================= */
+
+.dark-mode {
+    min-height: 100vh;
+    width: 100%;
+
+    background-color: #04142f;
+    color: white;
+
+    font-family: "Segoe UI", system-ui, sans-serif;
+
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+
+/* =========================
+   Light Mode
+   ========================= */
+
+.light-mode {
+    min-height: 100vh;
+    width: 100%;
+
+    background-color: #ffffff;
+    color: #222222;
+
+    font-family: "Segoe UI", system-ui, sans-serif;
+
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+/* =========================
+   Theme Button
+   ========================= */
+
+.theme-button {
+    position: fixed;
+
+    top: 90px;
+    right: 20px;
+
+    padding: 10px 18px;
+
+    border: none;
+    border-radius: 20px;
+
+    background-color: white;
+    color: #222222;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    z-index: 9999;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    transition: all 0.3s ease;
+}
+
+
+/* =========================
+   Theme Button Hover
+   ========================= */
+
+.theme-button:hover {
+    transform: scale(1.05);
+}
+
+
+/* =========================
+   Light Mode Button
+   ========================= */
+
+.light-mode .theme-button {
+    background-color: #04142f;
+    color: white;
+}
+
+
+/* =========================
+   Dark Mode Button
+   ========================= */
+
+.dark-mode .theme-button {
+    background-color: white;
+    color: #04142f;
+}
+
+
+/* =========================
+   Main App
+   ========================= */
 
 .app {
-  min-height: 100vh;
-  width: 100%;
-  background-color: var(--color-background);
+    min-height: 100vh;
+    width: 100%;
 }
 
-/* Remove any unused legacy styles */
-/* All global styles are now in design-tokens.css */
+
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 768px) {
+
+    .theme-button {
+        top: 75px;
+        right: 15px;
+
+        padding: 8px 14px;
+
+        font-size: 13px;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .theme-button {
+        top: 70px;
+        right: 10px;
+
+        padding: 7px 12px;
+
+        font-size: 12px;
+    }
+
+}
