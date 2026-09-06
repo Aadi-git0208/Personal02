@@ -1,18 +1,10 @@
-/* =========================
-   Home Page Styles
-   ========================= */
-
-
-/* =========================
-   Hero Section
-   ========================= */
-
 .hero-section {
     width: 100%;
     height: 100vh;
     overflow: hidden;
     position: relative;
     margin-top: 80px;
+    background-color: #04142f;
 }
 
 .hero-video {
@@ -25,14 +17,10 @@
     position: absolute;
     top: 0;
     left: 0;
-
     width: 100%;
     height: 100%;
-
     object-fit: cover;
-
     filter: brightness(0.4) blur(2px);
-
     z-index: 0;
 }
 
@@ -40,22 +28,21 @@
     position: absolute;
     top: 0;
     left: 0;
-
     width: 100%;
     height: 100%;
-
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-
     text-align: center;
-
     padding: 40px;
-
     background: rgba(15, 23, 42, 0.6);
-
     z-index: 1;
+    box-sizing: border-box;
+}
+
+.light-mode .hero-overlay {
+    background: rgba(255, 255, 255, 0.65);
 }
 
 .hero-content {
@@ -66,144 +53,102 @@
 .hero-title {
     font-size: 48px;
     font-weight: bold;
-
-    color: white;
-
+    color: #ffffff;
     margin-bottom: 25px;
-
     line-height: 1.2;
+}
+
+.light-mode .hero-title {
+    color: #172033;
 }
 
 .hero-description {
     font-size: 18px;
-
     color: #d6e4ff;
-
     line-height: 1.8;
-
     max-width: 800px;
-
     margin: 0 auto;
 }
 
-
-/* =========================
-   About Section
-   ========================= */
+.light-mode .hero-description {
+    color: #374151;
+}
 
 .about-section {
     width: 100%;
-
     padding: 50px 20px;
-
     margin-top: 50px;
-
     background-color: #04142f;
-
     box-sizing: border-box;
+    transition: background-color 0.3s ease;
 }
 
-
-/* About Title */
+.light-mode .about-section {
+    background-color: #f5f9ff;
+}
 
 .about-title {
     font-size: 40px;
-
     font-weight: bold;
-
-    color: white;
-
+    color: #ffffff;
     margin: 0 auto 30px auto;
-
     max-width: 1200px;
-
     line-height: 1.2;
 }
 
-
-/* =========================
-   About Container
-   ========================= */
+.light-mode .about-title {
+    color: #172033;
+}
 
 .about-container {
     display: flex;
-
     flex-direction: row;
-
     align-items: center;
-
     justify-content: space-between;
-
     gap: 40px;
-
     width: 100%;
-
     max-width: 1200px;
-
     min-height: 400px;
-
     padding: 35px;
-
     margin: 0 auto;
-
     background-color: #04142f;
-
     border: 1px solid #ffffff;
-
     border-radius: 40px;
-
     box-shadow: 0 0 15px red;
-
     box-sizing: border-box;
-
     overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-
-/* =========================
-   Description - LEFT
-   ========================= */
+.light-mode .about-container {
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 0 15px rgba(0, 136, 199, 0.2);
+}
 
 .about-description {
     width: 50%;
-
     margin: 0;
-
     font-size: 18px;
-
     color: #d6e4ff;
-
     line-height: 1.8;
 }
 
-
-/* =========================
-   Image - RIGHT
-   ========================= */
+.light-mode .about-description {
+    color: #374151;
+}
 
 .about-image {
     width: 50%;
-
     height: 350px;
-
     margin: 0;
-
     display: block;
-
     object-fit: cover;
-
     border-radius: 15px;
-
     animation: slideImage 1s ease-in-out;
 }
 
-
-/* =========================
-   Image Animation
-   ========================= */
-
 @keyframes slideImage {
-
     0% {
         transform: translateX(100px);
         opacity: 0;
@@ -217,41 +162,33 @@
         transform: translateX(0);
         opacity: 1;
     }
-
 }
-
-
-/* =========================
-   Footer
-   ========================= */
 
 .site-footer {
     background-color: #061126;
-
     padding: 40px 30px;
-
     text-align: center;
-
     border-top: 1px solid #ffffff;
-
     margin-top: 80px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.light-mode .site-footer {
+    background-color: #ffffff;
+    border-top-color: #d1d5db;
 }
 
 .footer-text {
     font-size: 14px;
-
     color: #b8c7df;
-
     margin: 0;
 }
 
-
-/* =========================
-   Tablet
-   ========================= */
+.light-mode .footer-text {
+    color: #4b5563;
+}
 
 @media (max-width: 1024px) {
-
     .hero-title {
         font-size: 40px;
     }
@@ -266,9 +203,7 @@
 
     .about-container {
         max-width: 900px;
-
         gap: 25px;
-
         padding: 30px;
     }
 
@@ -279,19 +214,11 @@
     .about-image {
         height: 300px;
     }
-
 }
 
-
-/* =========================
-   Mobile
-   ========================= */
-
 @media (max-width: 768px) {
-
     .hero-section {
         height: 80vh;
-
         margin-top: 70px;
     }
 
@@ -301,7 +228,6 @@
 
     .hero-title {
         font-size: 32px;
-
         margin-bottom: 20px;
     }
 
@@ -309,52 +235,35 @@
         font-size: 16px;
     }
 
-
-    /* About */
-
     .about-section {
         padding: 40px 15px;
     }
 
     .about-title {
         font-size: 32px;
-
         margin-bottom: 25px;
     }
 
     .about-container {
         flex-direction: column;
-
         gap: 25px;
-
         padding: 25px;
-
         border-radius: 30px;
     }
 
     .about-description {
         width: 100%;
-
         font-size: 16px;
-
         line-height: 1.7;
     }
 
     .about-image {
         width: 100%;
-
         height: 280px;
     }
-
 }
 
-
-/* =========================
-   Small Mobile
-   ========================= */
-
 @media (max-width: 480px) {
-
     .hero-section {
         height: 70vh;
     }
@@ -371,9 +280,6 @@
         font-size: 14px;
     }
 
-
-    /* About */
-
     .about-section {
         padding: 30px 10px;
     }
@@ -384,7 +290,6 @@
 
     .about-container {
         padding: 20px;
-
         border-radius: 25px;
     }
 
@@ -394,10 +299,7 @@
 
     .about-image {
         width: 100%;
-
         height: 230px;
-
         border-radius: 12px;
     }
-
 }

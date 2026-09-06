@@ -2,245 +2,433 @@ import { useState, useEffect } from "react";
 import "./ChatWithDoctor.css";
 
 function ChatWithDoctor() {
-  const patient = JSON.parse(localStorage.getItem("currentUser")) || {};
+    const patient =
+        JSON.parse(localStorage.getItem("currentUser")) || {};
 
-  const [doctors, setDoctors] = useState([]);
-  const [selectedDoctorId, setSelectedDoctorId] = useState("");
-  const [message, setMessage] = useState("");
+    const [doctors, setDoctors] = useState([]);
+    const [selectedDoctorId, setSelectedDoctorId] = useState("");
+    const [message, setMessage] = useState("");
 
-  // Load doctors from appointments (only doctors the patient has booked with)
-  useEffect(() => {
-    if (!patient?.id) return;
-
-    const appointments = JSON.parse(localStorage.getItem("appointments")) || [];
-    const patientAppointments = appointments.filter(
-      (app) => app.patientId === patient.id
-    );
-
-    // Get unique doctors from appointments
-    const doctorIds = new Set();
-    const doctorMap = new Map();
-
-    patientAppointments.forEach((app) => {
-      // Use both doctorId and doctorUserId from appointment
-      const doctorId = app.doctorId || app.doctorUserId;
-      const doctorUserId = app.doctorUserId || app.doctorId;
-      
-      // Create a unique key that includes both IDs
-      const uniqueKey = `${doctorId}-${doctorUserId}`;
-      
-      if (doctorId && !doctorIds.has(uniqueKey)) {
-        doctorIds.add(uniqueKey);
-        doctorMap.set(uniqueKey, {
-          id: doctorId,
-          userId: doctorUserId,
-          name: app.doctorName || "Unknown Doctor",
-          // Store both IDs for matching
-          appointmentDoctorId: app.doctorId,
-          appointmentDoctorUserId: app.doctorUserId,
-        });
-      }
-    });
-
-    // Also check doctor profiles for additional info
-    const doctorProfiles = JSON.parse(localStorage.getItem("doctorProfiles")) || [];
-    doctorProfiles.forEach((profile) => {
-      if (doctorMap.has(profile.id) || doctorMap.has(profile.userId)) {
-        const existing = doctorMap.get(profile.id) || doctorMap.get(profile.userId);
-        if (existing) {
-          doctorMap.set(profile.id || profile.userId, {
-            ...existing,
-            name: profile.name,
-            id: profile.id || profile.userId,
-            userId: profile.userId || profile.id,
-          });
+    const [chats, setChats] = useState(() => {
+        try {
+            return (
+                JSON.parse(
+                    localStorage.getItem("chats")
+                ) || []
+            );
+        } catch {
+            return [];
         }
-      }
     });
 
-    setDoctors(Array.from(doctorMap.values()));
-  }, [patient?.id]);
+    useEffect(() => {
+        if (!patient?.id) return;
 
-  /* 🔹 Get selected doctor object */
-  const selectedDoctor = doctors.find(
-    (doc) => doc.id === selectedDoctorId || doc.userId === selectedDoctorId
-  );
+        const loadDoctors = () => {
+            try {
+                const appointments =
+                    JSON.parse(
+                        localStorage.getItem("appointments")
+                    ) || [];
 
-  /* 🔹 Read ALL chats from localStorage (single source of truth) */
-  const [chats, setChats] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("chats")) || [];
-    } catch {
-      return [];
-    }
-  });
+                const patientAppointments =
+                    appointments.filter(
+                        (app) =>
+                            app.patientId === patient.id
+                    );
 
-  // Update chats when localStorage changes
-  useEffect(() => {
-    const loadChats = () => {
-      try {
-        const stored = JSON.parse(localStorage.getItem("chats")) || [];
-        setChats(stored);
-      } catch (err) {
-        console.error("Error loading chats:", err);
-      }
-    };
+                const doctorIds = new Set();
+                const doctorMap = new Map();
 
-    loadChats();
-    const interval = setInterval(loadChats, 1000);
-    window.addEventListener('storage', loadChats);
-    
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('storage', loadChats);
-    };
-  }, []);
+                patientAppointments.forEach((app) => {
+                    const doctorId =
+                        app.doctorId ||
+                        app.doctorUserId;
 
-  /* 🔹 Derive messages */
-  const messages = selectedDoctor && patient?.id
-    ? chats
-        .filter((msg) => {
-          const matchesPatient = msg.patientId === patient.id;
-          const matchesDoctor = 
-            msg.doctorId === selectedDoctor.id || 
-            msg.doctorId === selectedDoctor.userId ||
-            msg.doctorUserId === selectedDoctor.id ||
-            msg.doctorUserId === selectedDoctor.userId;
-          return matchesPatient && matchesDoctor;
-        })
-        .sort((a, b) => {
-          const timeA = a.timestamp || a.time || "";
-          const timeB = b.timestamp || b.time || "";
-          return timeA.localeCompare(timeB);
-        })
-    : [];
+                    const doctorUserId =
+                        app.doctorUserId ||
+                        app.doctorId;
 
-  /* 🔹 Send message */
-  const sendMessage = () => {
-    if (!message.trim() || !selectedDoctor || !patient?.id) return;
+                    const uniqueKey = `${doctorId}-${doctorUserId}`;
 
-    // Get doctor profile to ensure we have the correct IDs
-    const doctorProfiles = JSON.parse(localStorage.getItem("doctorProfiles")) || [];
-    const doctorProfile = doctorProfiles.find(
-      (p) => p.id === selectedDoctor.id || 
-             p.id === selectedDoctor.userId ||
-             p.userId === selectedDoctor.id ||
-             p.userId === selectedDoctor.userId ||
-             p.id === selectedDoctor.appointmentDoctorId ||
-             p.userId === selectedDoctor.appointmentDoctorUserId
+                    if (
+                        doctorId &&
+                        !doctorIds.has(uniqueKey)
+                    ) {
+                        doctorIds.add(uniqueKey);
+
+                        doctorMap.set(uniqueKey, {
+                            id: doctorId,
+                            userId: doctorUserId,
+                            name:
+                                app.doctorName ||
+                                "Unknown Doctor",
+                            appointmentDoctorId:
+                                app.doctorId,
+                            appointmentDoctorUserId:
+                                app.doctorUserId
+                        });
+                    }
+                });
+
+                const doctorProfiles =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "doctorProfiles"
+                        )
+                    ) || [];
+
+                doctorProfiles.forEach((profile) => {
+                    const existing =
+                        doctorMap.get(profile.id) ||
+                        doctorMap.get(profile.userId);
+
+                    if (existing) {
+                        doctorMap.set(
+                            profile.id ||
+                                profile.userId,
+                            {
+                                ...existing,
+                                name:
+                                    profile.name ||
+                                    existing.name,
+                                id:
+                                    profile.id ||
+                                    profile.userId,
+                                userId:
+                                    profile.userId ||
+                                    profile.id
+                            }
+                        );
+                    }
+                });
+
+                setDoctors(
+                    Array.from(doctorMap.values())
+                );
+            } catch (error) {
+                console.error(
+                    "Error loading doctors:",
+                    error
+                );
+            }
+        };
+
+        loadDoctors();
+
+        const interval = setInterval(
+            loadDoctors,
+            1000
+        );
+
+        window.addEventListener(
+            "storage",
+            loadDoctors
+        );
+
+        return () => {
+            clearInterval(interval);
+
+            window.removeEventListener(
+                "storage",
+                loadDoctors
+            );
+        };
+    }, [patient?.id]);
+
+    const selectedDoctor = doctors.find(
+        (doctor) =>
+            doctor.id === selectedDoctorId ||
+            doctor.userId === selectedDoctorId
     );
 
-    // Use appointment IDs first (most reliable), then profile IDs, then fallback
-    const doctorId = selectedDoctor.appointmentDoctorId || 
-                     selectedDoctor.id || 
-                     doctorProfile?.id || 
-                     selectedDoctor.userId;
-    const doctorUserId = selectedDoctor.appointmentDoctorUserId || 
-                         selectedDoctor.userId || 
-                         doctorProfile?.userId || 
-                         doctorProfile?.id || 
-                         selectedDoctor.id;
+    useEffect(() => {
+        const loadChats = () => {
+            try {
+                const stored =
+                    JSON.parse(
+                        localStorage.getItem("chats")
+                    ) || [];
 
-    const newMessage = {
-      id: crypto.randomUUID(), 
-      from: "patient",
-      to: "doctor",
-      patientId: patient.id,
-      patientName: patient.name || "Patient",
-      doctorId: doctorId,
-      doctorUserId: doctorUserId,
-      doctorName: selectedDoctor.name,
-      message: message.trim(),
-      time: new Date().toLocaleTimeString(),
-      timestamp: new Date().toISOString(),
+                setChats(stored);
+            } catch (error) {
+                console.error(
+                    "Error loading chats:",
+                    error
+                );
+            }
+        };
+
+        loadChats();
+
+        const interval = setInterval(
+            loadChats,
+            1000
+        );
+
+        window.addEventListener(
+            "storage",
+            loadChats
+        );
+
+        return () => {
+            clearInterval(interval);
+
+            window.removeEventListener(
+                "storage",
+                loadChats
+            );
+        };
+    }, []);
+
+    const messages =
+        selectedDoctor && patient?.id
+            ? chats
+                  .filter((msg) => {
+                      const matchesPatient =
+                          msg.patientId ===
+                          patient.id;
+
+                      const matchesDoctor =
+                          msg.doctorId ===
+                              selectedDoctor.id ||
+                          msg.doctorId ===
+                              selectedDoctor.userId ||
+                          msg.doctorUserId ===
+                              selectedDoctor.id ||
+                          msg.doctorUserId ===
+                              selectedDoctor.userId;
+
+                      return (
+                          matchesPatient &&
+                          matchesDoctor
+                      );
+                  })
+                  .sort((a, b) => {
+                      const timeA =
+                          a.timestamp ||
+                          a.time ||
+                          "";
+
+                      const timeB =
+                          b.timestamp ||
+                          b.time ||
+                          "";
+
+                      return timeA.localeCompare(
+                          timeB
+                      );
+                  })
+            : [];
+
+    const sendMessage = () => {
+        if (
+            !message.trim() ||
+            !selectedDoctor ||
+            !patient?.id
+        ) {
+            return;
+        }
+
+        const doctorProfiles =
+            JSON.parse(
+                localStorage.getItem(
+                    "doctorProfiles"
+                )
+            ) || [];
+
+        const doctorProfile =
+            doctorProfiles.find(
+                (profile) =>
+                    profile.id ===
+                        selectedDoctor.id ||
+                    profile.id ===
+                        selectedDoctor.userId ||
+                    profile.userId ===
+                        selectedDoctor.id ||
+                    profile.userId ===
+                        selectedDoctor.userId ||
+                    profile.id ===
+                        selectedDoctor.appointmentDoctorId ||
+                    profile.userId ===
+                        selectedDoctor.appointmentDoctorUserId
+            );
+
+        const doctorId =
+            selectedDoctor.appointmentDoctorId ||
+            selectedDoctor.id ||
+            doctorProfile?.id ||
+            selectedDoctor.userId;
+
+        const doctorUserId =
+            selectedDoctor.appointmentDoctorUserId ||
+            selectedDoctor.userId ||
+            doctorProfile?.userId ||
+            doctorProfile?.id ||
+            selectedDoctor.id;
+
+        const newMessage = {
+            id: crypto.randomUUID(),
+            from: "patient",
+            to: "doctor",
+            patientId: patient.id,
+            patientName:
+                patient.name || "Patient",
+            doctorId: doctorId,
+            doctorUserId: doctorUserId,
+            doctorName:
+                selectedDoctor.name,
+            message: message.trim(),
+            time: new Date().toLocaleTimeString(),
+            timestamp:
+                new Date().toISOString()
+        };
+
+        const updatedChats = [
+            ...chats,
+            newMessage
+        ];
+
+        localStorage.setItem(
+            "chats",
+            JSON.stringify(updatedChats)
+        );
+
+        setChats(updatedChats);
+        setMessage("");
+
+        window.dispatchEvent(
+            new Event("storage")
+        );
     };
 
-    const updatedChats = [...chats, newMessage];
-    localStorage.setItem("chats", JSON.stringify(updatedChats));
-    setChats(updatedChats); // Update state immediately
+    return (
+        <div className="chat-container">
+            <h2 className="chat-title">
+                Chat with Doctor
+            </h2>
 
-    setMessage("");
-    
-    // Force re-render by dispatching storage event
-    window.dispatchEvent(new Event('storage'));
-  };
+            {doctors.length === 0 ? (
+                <div className="no-doctors-chat">
+                    <p>
+                        No doctors available.
+                        Please book an appointment
+                        first.
+                    </p>
+                </div>
+            ) : (
+                <select
+                    className="doctor-select"
+                    value={selectedDoctorId}
+                    onChange={(event) =>
+                        setSelectedDoctorId(
+                            event.target.value
+                        )
+                    }
+                >
+                    <option value="">
+                        Select Doctor
+                    </option>
 
-  return (
-    <div className="chat-container">
-      <h2>Chat with Doctor</h2>
-
-      {/* ===== Doctor Selection ===== */}
-      {doctors.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <p style={{ opacity: 0.7 }}>
-            No doctors available. Please book an appointment first.
-          </p>
-        </div>
-      ) : (
-        <select
-          className="doctor-select"
-          value={selectedDoctorId}
-          onChange={(e) => setSelectedDoctorId(e.target.value)}
-        >
-          <option value="">Select Doctor</option>
-          {doctors.map((doc) => (
-            <option key={doc.id || doc.userId} value={doc.id || doc.userId}>
-              {doc.name}
-            </option>
-          ))}
-        </select>
-      )}
-
-      {/* ===== Chat Box ===== */}
-      {selectedDoctor && (
-        <div className="chat-box">
-          <div className="messages">
-            {messages.length === 0 && (
-              <p className="empty">No messages yet</p>
+                    {doctors.map((doctor) => (
+                        <option
+                            key={
+                                doctor.id ||
+                                doctor.userId
+                            }
+                            value={
+                                doctor.id ||
+                                doctor.userId
+                            }
+                        >
+                            {doctor.name}
+                        </option>
+                    ))}
+                </select>
             )}
 
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`message ${
-                  msg.from === "patient" ? "patient" : "doctor"
-                }`}
-              >
-                <span>{msg.message}</span>
-                <small>{msg.time}</small>
-              </div>
-            ))}
-            {/* Auto-scroll to bottom */}
-            {messages.length > 0 && (
-              <div ref={(el) => {
-                if (el) {
-                  setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
-                }
-              }} />
-            )}
-          </div>
+            {selectedDoctor && (
+                <div className="chat-box">
+                    <div className="messages">
+                        {messages.length === 0 && (
+                            <p className="empty">
+                                No messages yet
+                            </p>
+                        )}
 
-          <div className="chat-input">
-            <input
-              type="text"
-              placeholder="Type your message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  sendMessage();
-                }
-              }}
-            />
-            <button onClick={sendMessage} disabled={!message.trim()}>
-              Send
-            </button>
-          </div>
+                        {messages.map((msg) => (
+                            <div
+                                key={msg.id}
+                                className={`message ${
+                                    msg.from ===
+                                    "patient"
+                                        ? "patient"
+                                        : "doctor"
+                                }`}
+                            >
+                                <span>
+                                    {msg.message}
+                                </span>
+
+                                <small>
+                                    {msg.time}
+                                </small>
+                            </div>
+                        ))}
+
+                        {messages.length > 0 && (
+                            <div
+                                ref={(element) => {
+                                    if (element) {
+                                        setTimeout(
+                                            () =>
+                                                element.scrollIntoView(
+                                                    {
+                                                        behavior:
+                                                            "smooth"
+                                                    }
+                                                ),
+                                            100
+                                        );
+                                    }
+                                }}
+                            />
+                        )}
+                    </div>
+
+                    <div className="chat-input">
+                        <input
+                            type="text"
+                            placeholder="Type your message..."
+                            value={message}
+                            onChange={(event) =>
+                                setMessage(
+                                    event.target.value
+                                )
+                            }
+                            onKeyDown={(event) => {
+                                if (
+                                    event.key ===
+                                        "Enter" &&
+                                    !event.shiftKey
+                                ) {
+                                    event.preventDefault();
+                                    sendMessage();
+                                }
+                            }}
+                        />
+
+                        <button
+                            onClick={sendMessage}
+                            disabled={!message.trim()}
+                        >
+                            Send
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default ChatWithDoctor;

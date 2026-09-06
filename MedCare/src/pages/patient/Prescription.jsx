@@ -1,109 +1,260 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import "../../components/MedicineDashboard.css";
 
-export default function Prescription() {
+const Prescription = ({
+    medicine,
+    onAddToCart,
+    onBuyNow,
+    showAddToCart = true,
+    userRole = null
+}) => {
+    const {
+        id,
+        name,
+        price,
+        image,
+        description,
+        composition,
+        stock,
+        availability,
+        rating
+    } = medicine || {};
 
-  const [data] = useState(() => {
-    const saved = localStorage.getItem("prescription");
-    return saved ? JSON.parse(saved) : null;
-  });
+    const [quantity, setQuantity] = useState(1);
+    const [imageError, setImageError] = useState(false);
 
-  return (
-    <div>
-      <style>{css}</style>
+    const stockStatus =
+        stock !== undefined ? stock : availability;
 
-      <div className="page">
-        <h2>📄 My Prescription</h2>
+    const isInStock =
+        stockStatus !== undefined
+            ? typeof stockStatus === "number"
+                ? stockStatus > 0
+                : stockStatus === true ||
+                  stockStatus === "available"
+            : true;
 
-        {!data ? (
-          <div className="empty">
-            No prescription found ❌
-          </div>
-        ) : (
-          <div className="card">
+    const handleImageError = () => {
+        setImageError(true);
+    };
 
-            <div className="info">
-              <p><b>Patient:</b> {data.patientName}</p>
-              <p><b>Doctor:</b> {data.doctor}</p>
-              <p><b>Date:</b> {data.date}</p>
-              <p><b>Diagnosis:</b> {data.diagnosis}</p>
+    const handleQuantityChange = (event) => {
+        const selectedQuantity =
+            parseInt(event.target.value) || 1;
+
+        if (
+            selectedQuantity >= 1 &&
+            selectedQuantity <= 10
+        ) {
+            setQuantity(selectedQuantity);
+        }
+    };
+
+    const handleAddToCartClick = () => {
+        if (onAddToCart && isInStock) {
+            onAddToCart(medicine, quantity);
+            setQuantity(1);
+        }
+    };
+
+    const handleBuyNowClick = () => {
+        if (onBuyNow && isInStock) {
+            onBuyNow(medicine, quantity);
+            setQuantity(1);
+        }
+    };
+
+    const ratingValue =
+        typeof rating === "number"
+            ? Math.max(0, Math.min(5, rating))
+            : null;
+
+    const fullStars =
+        ratingValue !== null
+            ? Math.floor(ratingValue)
+            : 0;
+
+    const emptyStars =
+        ratingValue !== null
+            ? 5 - fullStars
+            : 0;
+
+    if (!medicine) {
+        return (
+            <div className="medicine-page">
+                <h1 className="medicine-title">
+                    Prescription
+                </h1>
+
+                <div className="medicine-empty">
+                    <p>
+                        No prescription available.
+                    </p>
+                </div>
             </div>
+        );
+    }
 
-            <table>
-              <thead>
-                <tr>
-                  <th>Medicine</th>
-                  <th>Dosage</th>
-                  <th>Duration</th>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.medicines.map((m, i) => (
-                  <tr key={i}>
-                    <td>{m.name}</td>
-                    <td>{m.dose}</td>
-                    <td>{m.duration}</td>
-                    <td>{m.notes}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    return (
+        <div className="medicine-page">
+            <h1 className="medicine-title">
+                Prescription
+            </h1>
 
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+            <div className="medicine-grid-vertical">
+                <div className="medicine-card-vertical">
+                    <div className="medicine-card-image">
+                        {image && !imageError ? (
+                            <img
+                                src={image}
+                                alt={name || "Medicine"}
+                                onError={handleImageError}
+                            />
+                        ) : (
+                            <div className="medicine-image-placeholder">
+                                No Image
+                            </div>
+                        )}
+                    </div>
 
-const css = `
-.page {
-  padding: 30px;
-  min-height: 100vh;
-  background: #0b132b;
-  color: white;
-  font-family: Arial, sans-serif;
-}
+                    <h4 className="medicine-card-name">
+                        {name || "Unnamed Medicine"}
+                    </h4>
 
-h2 {
-  margin-bottom: 20px;
-}
+                    {ratingValue !== null && (
+                        <div className="medicine-card-rating">
+                            <span className="rating-stars">
+                                {"★".repeat(fullStars)}
+                                {"☆".repeat(emptyStars)}
+                            </span>
 
-.card {
-  background: linear-gradient(135deg, #0f3460, #16213e);
-  padding: 25px;
-  border-radius: 18px;
-  max-width: 900px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
+                            <span className="rating-value">
+                                ({ratingValue.toFixed(1)})
+                            </span>
+                        </div>
+                    )}
 
-.info p {
-  margin: 6px 0;
-}
+                    <div className="medicine-card-price">
+                        {price !== undefined
+                            ? `₹${price}`
+                            : "Price not available"}
+                    </div>
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
+                    {(description || composition) && (
+                        <p className="medicine-card-description">
+                            {description || composition}
+                        </p>
+                    )}
 
-th, td {
-  padding: 10px;
-  border-bottom: 1px solid #334;
-  text-align: left;
-}
+                    <div className="medicine-card-stock">
+                        {isInStock ? (
+                            <span className="stock-available">
+                                ✓ In Stock
+                            </span>
+                        ) : (
+                            <span className="stock-unavailable">
+                                ✗ Out of Stock
+                            </span>
+                        )}
 
-th {
-  color: #00c6ff;
-}
+                        {typeof stockStatus === "number" && (
+                            <span className="stock-count">
+                                ({stockStatus} left)
+                            </span>
+                        )}
+                    </div>
 
-.empty {
-  margin-top: 30px;
-  padding: 20px;
-  background: #1c2541;
-  border-radius: 12px;
-  text-align: center;
-  color: #ffb703;
-  font-weight: bold;
-}
-`;
+                    {showAddToCart &&
+                        userRole === "patient" && (
+                            <div className="medicine-card-actions">
+                                {isInStock ? (
+                                    <>
+                                        <div className="quantity-selector">
+                                            <label
+                                                htmlFor={`qty-${id}`}
+                                            >
+                                                Qty:
+                                            </label>
+
+                                            <select
+                                                id={`qty-${id}`}
+                                                value={quantity}
+                                                onChange={
+                                                    handleQuantityChange
+                                                }
+                                                className="quantity-select"
+                                            >
+                                                {Array.from(
+                                                    { length: 10 },
+                                                    (_, index) => (
+                                                        <option
+                                                            key={
+                                                                index + 1
+                                                            }
+                                                            value={
+                                                                index + 1
+                                                            }
+                                                        >
+                                                            {index + 1}
+                                                        </option>
+                                                    )
+                                                )}
+                                            </select>
+                                        </div>
+
+                                        <div className="medicine-card-actions-row">
+                                            <button
+                                                type="button"
+                                                className="add-cart-btn-vertical"
+                                                onClick={
+                                                    handleAddToCartClick
+                                                }
+                                            >
+                                                Add to Cart
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className="buy-now-btn"
+                                                onClick={
+                                                    handleBuyNowClick
+                                                }
+                                            >
+                                                Buy Now
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="add-cart-btn-vertical"
+                                        disabled
+                                    >
+                                        Out of Stock
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                    <div className="medicine-card-bottom-actions">
+                        <button
+                            type="button"
+                            className="feedback-btn"
+                        >
+                            Feedback
+                        </button>
+
+                        <button
+                            type="button"
+                            className="message-btn"
+                        >
+                            Message
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Prescription;

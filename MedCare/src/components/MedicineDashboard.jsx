@@ -4,123 +4,209 @@ import MedicineCard from "./MedicineCard";
 import "./MedicineDashboard.css";
 
 const MedicineDashboard = () => {
-  const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+    const navigate = useNavigate();
 
-  const [medicines, setMedicines] = useState(() => {
-    const stored = JSON.parse(localStorage.getItem("medicines"));
-    return stored && stored.length > 0 ? stored : [];
-  });
+    const user =
+        JSON.parse(localStorage.getItem("currentUser")) ||
+        null;
 
-  const [cart, setCart] = useState(() => {
-    return JSON.parse(localStorage.getItem("cart")) || [];
-  });
+    const [medicines, setMedicines] = useState(() => {
+        try {
+            const stored =
+                JSON.parse(
+                    localStorage.getItem("medicines")
+                ) || [];
 
-  const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    const loadMedicines = () => {
-      try {
-        const stored = JSON.parse(localStorage.getItem("medicines")) || [];
-        setMedicines(stored);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    loadMedicines();
-    window.addEventListener("storage", loadMedicines);
-    const interval = setInterval(loadMedicines, 1000);
-
-    return () => {
-      window.removeEventListener("storage", loadMedicines);
-      clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
-
-  const handleAddToCart = (medicine, quantity = 1) => {
-    if (!user) {
-      alert("Please login to buy medicines");
-      navigate("/login");
-      return;
-    }
-
-    if (user.role !== "patient") {
-      alert("Only patients can buy medicines");
-      return;
-    }
-
-    setCart(prev => {
-      const exists = prev.find(item => item.id === medicine.id);
-      if (exists) {
-        return prev.map(item =>
-          item.id === medicine.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      }
-      return [...prev, { ...medicine, quantity }];
+            return stored.length > 0 ? stored : [];
+        } catch {
+            return [];
+        }
     });
-  };
 
-  const handleBuyNow = (medicine) => {
-    handleAddToCart(medicine, 1);
-    navigate("/cart");
-  };
+    const [cart, setCart] = useState(() => {
+        try {
+            return (
+                JSON.parse(
+                    localStorage.getItem("cart")
+                ) || []
+            );
+        } catch {
+            return [];
+        }
+    });
 
-  const filteredMedicines = medicines.filter(m =>
-    m.name.toLowerCase().includes(search.toLowerCase())
-  );
+    const [search, setSearch] = useState("");
 
-  return (
-    <div className="medicine-page">
-      <h1 className="medicine-title">Medicines</h1>
+    useEffect(() => {
+        const loadMedicines = () => {
+            try {
+                const stored =
+                    JSON.parse(
+                        localStorage.getItem("medicines")
+                    ) || [];
 
-      <div className="medicine-top-bar">
-        <input
-          type="text"
-          placeholder="Search medicines..."
-          className="medicine-search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+                setMedicines(stored);
+            } catch (error) {
+                console.error(
+                    "Error loading medicines:",
+                    error
+                );
+            }
+        };
 
-        <div
-          className="medicine-cart-btn"
-          onClick={() => navigate("/cart")}
-        >
-          🛒 Cart
+        loadMedicines();
+
+        window.addEventListener(
+            "storage",
+            loadMedicines
+        );
+
+        const interval = setInterval(
+            loadMedicines,
+            1000
+        );
+
+        return () => {
+            window.removeEventListener(
+                "storage",
+                loadMedicines
+            );
+
+            clearInterval(interval);
+        };
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem(
+            "cart",
+            JSON.stringify(cart)
+        );
+    }, [cart]);
+
+    const handleAddToCart = (
+        medicine,
+        quantity = 1
+    ) => {
+        if (!user) {
+            alert("Please login to buy medicines");
+            navigate("/login");
+            return;
+        }
+
+        if (user.role !== "patient") {
+            alert("Only patients can buy medicines");
+            return;
+        }
+
+        setCart((previousCart) => {
+            const exists = previousCart.find(
+                (item) => item.id === medicine.id
+            );
+
+            if (exists) {
+                return previousCart.map((item) =>
+                    item.id === medicine.id
+                        ? {
+                              ...item,
+                              quantity:
+                                  item.quantity +
+                                  quantity
+                          }
+                        : item
+                );
+            }
+
+            return [
+                ...previousCart,
+                {
+                    ...medicine,
+                    quantity: quantity
+                }
+            ];
+        });
+    };
+
+    const handleBuyNow = (medicine) => {
+        if (!user) {
+            alert("Please login to buy medicines");
+            navigate("/login");
+            return;
+        }
+
+        if (user.role !== "patient") {
+            alert("Only patients can buy medicines");
+            return;
+        }
+
+        handleAddToCart(medicine, 1);
+        navigate("/cart");
+    };
+
+    const filteredMedicines = medicines.filter(
+        (medicine) =>
+            medicine.name
+                ?.toLowerCase()
+                .includes(search.toLowerCase())
+    );
+
+    return (
+        <div className="medicine-page">
+            <h1 className="medicine-title">
+                Medicines
+            </h1>
+
+            <div className="medicine-top-bar">
+                <input
+                    type="text"
+                    placeholder="Search medicines..."
+                    className="medicine-search"
+                    value={search}
+                    onChange={(event) =>
+                        setSearch(event.target.value)
+                    }
+                />
+
+                <button
+                    className="medicine-cart-btn"
+                    onClick={() =>
+                        navigate("/cart")
+                    }
+                >
+                    Cart
+                </button>
+            </div>
+
+            <h2>Available Medicines</h2>
+
+            {filteredMedicines.length === 0 ? (
+                <div className="medicine-empty">
+                    <p>
+                        No medicines available
+                    </p>
+                </div>
+            ) : (
+                <div className="medicine-grid-vertical">
+                    {filteredMedicines.map(
+                        (medicine) => (
+                            <MedicineCard
+                                key={medicine.id}
+                                medicine={medicine}
+                                onAddToCart={
+                                    handleAddToCart
+                                }
+                                onBuyNow={
+                                    handleBuyNow
+                                }
+                                userRole={
+                                    user?.role || null
+                                }
+                            />
+                        )
+                    )}
+                </div>
+            )}
         </div>
-      </div>
-
-      <h2>Available Medicines</h2>
-
-      {filteredMedicines.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "60px 20px" }}>
-          <p style={{ fontSize: "18px", opacity: 0.7 }}>
-            No medicines available
-          </p>
-        </div>
-      ) : (
-        <div className="medicine-grid-vertical">
-          {filteredMedicines.map((med) => (
-            <MedicineCard
-              key={med.id}
-              medicine={med}
-              onAddToCart={handleAddToCart}
-              onBuyNow={handleBuyNow}
-              userRole={user?.role || null}
-            />
-          ))}
-        </div>
-      )}
-
-    </div>
-  );
+    );
 };
 
 export default MedicineDashboard;
