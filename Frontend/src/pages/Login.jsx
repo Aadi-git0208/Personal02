@@ -1,66 +1,34 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getApiErrorMessage } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
+import { getDashboardPath } from "../auth/session";
 import "./Login.css";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false);
+    const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const { login } = useAuth();
+    const registered = Boolean(location.state?.registered);
 
-    function handleLogin(e) {
-        e.preventDefault();
+    async function handleLogin(event) {
+        event.preventDefault();
+        setError("");
+        setSubmitting(true);
 
-        const users = JSON.parse(localStorage.getItem("users")) || [];
-
-        const storedUser = users.find(
-            (user) =>
-                user.email === email &&
-                user.password === password
-        );
-
-        if (!storedUser) {
-            alert("Invalid email or password");
-            return;
-        }
-
-        alert("Login Successful! Welcome to MediCurex");
-
-        if (rememberMe) {
-            localStorage.setItem("isLoggedIn", "true");
-        }
-
-        localStorage.setItem(
-            "currentUser",
-            JSON.stringify(storedUser)
-        );
-
-        window.dispatchEvent(new Event("userLogin"));
-
-        const userRole = storedUser.role || "patient";
-
-        if (userRole === "doctor") {
-            const doctorProfiles =
-                JSON.parse(
-                    localStorage.getItem("doctorProfiles")
-                ) || [];
-
-            const hasProfile = doctorProfiles.some(
-                (profile) =>
-                    profile.id === storedUser.id ||
-                    profile.userId === storedUser.id
-            );
-
-            if (!hasProfile) {
-                navigate("/doctor/onboarding");
-            } else {
-                navigate("/doctor");
-            }
-        } else if (userRole === "admin") {
-            navigate("/admin/dashboard");
-        } else {
-            navigate("/patient/dashboard");
+        try {
+            const user = await login(email.trim(), password);
+            navigate(getDashboardPath(user), { replace: true });
+        } catch (loginError) {
+            setError(getApiErrorMessage(loginError));
+        } finally {
+            setSubmitting(false);
         }
     }
 
@@ -80,6 +48,18 @@ function Login() {
                     </p>
                 </div>
 
+                {registered && !error && (
+                    <p className="auth-banner auth-banner--success" role="status">
+                        Registration successful. Please log in.
+                    </p>
+                )}
+
+                {error && (
+                    <p className="auth-banner auth-banner--error" role="alert">
+                        {error}
+                    </p>
+                )}
+
                 <form
                     className="auth-form"
                     onSubmit={handleLogin}
@@ -98,9 +78,10 @@ function Login() {
                             className="form-input"
                             placeholder="Enter your email"
                             value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
+                            onChange={(event) =>
+                                setEmail(event.target.value)
                             }
+                            autoComplete="email"
                             required
                         />
                     </div>
@@ -119,9 +100,10 @@ function Login() {
                             className="form-input"
                             placeholder="Enter your password"
                             value={password}
-                            onChange={(e) =>
-                                setPassword(e.target.value)
+                            onChange={(event) =>
+                                setPassword(event.target.value)
                             }
+                            autoComplete="current-password"
                             required
                         />
                     </div>
@@ -131,9 +113,9 @@ function Login() {
                             <input
                                 type="checkbox"
                                 checked={rememberMe}
-                                onChange={(e) =>
+                                onChange={(event) =>
                                     setRememberMe(
-                                        e.target.checked
+                                        event.target.checked
                                     )
                                 }
                                 className="checkbox-input"
@@ -153,8 +135,9 @@ function Login() {
                     <button
                         type="submit"
                         className="auth-button auth-button--primary"
+                        disabled={submitting}
                     >
-                        Login
+                        {submitting ? "Logging in..." : "Login"}
                     </button>
                 </form>
 

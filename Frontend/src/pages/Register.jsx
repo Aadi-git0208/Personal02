@@ -1,59 +1,49 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { getApiErrorMessage } from "../api/client";
+import { useAuth } from "../auth/AuthContext";
 import "./Register.css";
 
 function Register() {
     const navigate = useNavigate();
+    const { register } = useAuth();
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [role, setRole] = useState("patient");
+    const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
-    function handleRegister(e) {
-        e.preventDefault();
+    async function handleRegister(event) {
+        event.preventDefault();
+        setError("");
 
         if (password !== confirmPassword) {
-            alert("Passwords do not match. Please try again.");
+            setError("Passwords do not match. Please try again.");
             return;
         }
 
-        const users =
-            JSON.parse(localStorage.getItem("users")) || [];
+        setSubmitting(true);
 
-        const emailExists = users.some(
-            (user) => user.email === email
-        );
+        try {
+            await register({
+                name: name.trim(),
+                email: email.trim(),
+                password,
+                role
+            });
 
-        if (emailExists) {
-            alert(
-                "Email already registered. Please use a different email or login."
-            );
-            return;
+            navigate("/login", {
+                replace: true,
+                state: { registered: true }
+            });
+        } catch (registerError) {
+            setError(getApiErrorMessage(registerError));
+        } finally {
+            setSubmitting(false);
         }
-
-        const newUser = {
-            id: Date.now().toString(),
-            name: name,
-            email: email,
-            password: password,
-            role: role,
-            createdAt: new Date().toISOString()
-        };
-
-        users.push(newUser);
-
-        localStorage.setItem(
-            "users",
-            JSON.stringify(users)
-        );
-
-        alert(
-            "Registration Successful! You can now Login to MediCurex"
-        );
-
-        navigate("/login");
     }
 
     return (
@@ -74,6 +64,12 @@ function Register() {
                     </p>
                 </div>
 
+                {error && (
+                    <p className="auth-banner auth-banner--error" role="alert">
+                        {error}
+                    </p>
+                )}
+
                 <form
                     className="auth-form"
                     onSubmit={handleRegister}
@@ -92,9 +88,11 @@ function Register() {
                             className="form-input"
                             placeholder="Enter your full name"
                             value={name}
-                            onChange={(e) =>
-                                setName(e.target.value)
+                            onChange={(event) =>
+                                setName(event.target.value)
                             }
+                            autoComplete="name"
+                            minLength={2}
                             required
                         />
                     </div>
@@ -113,23 +111,28 @@ function Register() {
                             className="form-input"
                             placeholder="Enter your email"
                             value={email}
-                            onChange={(e) =>
-                                setEmail(e.target.value)
+                            onChange={(event) =>
+                                setEmail(event.target.value)
                             }
+                            autoComplete="email"
                             required
                         />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">
+                        <label
+                            htmlFor="role"
+                            className="form-label"
+                        >
                             Register As
                         </label>
 
                         <select
+                            id="role"
                             className="form-input"
                             value={role}
-                            onChange={(e) =>
-                                setRole(e.target.value)
+                            onChange={(event) =>
+                                setRole(event.target.value)
                             }
                             required
                         >
@@ -140,11 +143,10 @@ function Register() {
                             <option value="doctor">
                                 Doctor
                             </option>
-
-                            <option value="admin">
-                                Admin
-                            </option>
                         </select>
+                        <p className="form-hint">
+                            Admin accounts are created by the system, not public registration.
+                        </p>
                     </div>
 
                     <div className="form-group">
@@ -161,9 +163,11 @@ function Register() {
                             className="form-input"
                             placeholder="Create a password"
                             value={password}
-                            onChange={(e) =>
-                                setPassword(e.target.value)
+                            onChange={(event) =>
+                                setPassword(event.target.value)
                             }
+                            autoComplete="new-password"
+                            minLength={6}
                             required
                         />
                     </div>
@@ -182,9 +186,11 @@ function Register() {
                             className="form-input"
                             placeholder="Confirm your password"
                             value={confirmPassword}
-                            onChange={(e) =>
-                                setConfirmPassword(e.target.value)
+                            onChange={(event) =>
+                                setConfirmPassword(event.target.value)
                             }
+                            autoComplete="new-password"
+                            minLength={6}
                             required
                         />
                     </div>
@@ -192,8 +198,9 @@ function Register() {
                     <button
                         type="submit"
                         className="auth-button auth-button--primary"
+                        disabled={submitting}
                     >
-                        Register
+                        {submitting ? "Creating account..." : "Register"}
                     </button>
                 </form>
 
