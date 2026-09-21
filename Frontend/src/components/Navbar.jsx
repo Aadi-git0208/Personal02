@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
+import { getDashboardPath } from "../auth/session";
 import "./Navbar.css";
 
 const Navbar = ({ darkMode, setDarkMode }) => {
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const user = localStorage.getItem("currentUser");
-      return user ? JSON.parse(user) : null;
-    } catch {
-      return null;
-    }
-  });
+  const { user: currentUser, logout } = useAuth();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -18,27 +13,6 @@ const Navbar = ({ darkMode, setDarkMode }) => {
   const isPortalRoute = ["/patient", "/doctor", "/admin"].some((route) =>
     location.pathname === route || location.pathname.startsWith(`${route}/`)
   );
-
-  useEffect(() => {
-    const handleStorageChange = () => {
-      try {
-        const user = localStorage.getItem("currentUser");
-        setCurrentUser(user ? JSON.parse(user) : null);
-      } catch {
-        setCurrentUser(null);
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("userLogin", handleStorageChange);
-    window.addEventListener("userLogout", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("userLogin", handleStorageChange);
-      window.removeEventListener("userLogout", handleStorageChange);
-    };
-  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -53,10 +27,7 @@ const Navbar = ({ darkMode, setDarkMode }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("isLoggedIn");
-    setCurrentUser(null);
-    window.dispatchEvent(new Event("userLogout"));
+    logout();
     navigate("/");
     closeMobileMenu();
   };
@@ -76,20 +47,8 @@ const Navbar = ({ darkMode, setDarkMode }) => {
   };
 
   const goToDashboard = () => {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-
-    if (!user) return;
-
-    if (user.role === "patient") {
-      navigate("/patient");
-    } else if (user.role === "doctor") {
-      navigate("/doctor");
-    } else if (user.role === "admin") {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/");
-    }
-
+    if (!currentUser) return;
+    navigate(getDashboardPath(currentUser));
     closeMobileMenu();
   };
 

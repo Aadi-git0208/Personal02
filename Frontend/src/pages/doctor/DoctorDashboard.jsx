@@ -52,7 +52,7 @@ const DoctorDashboard = () => {
 
     useEffect(() => {
         if (!doctor?.name) {
-            navigate("/doctor/login");
+            navigate("/login");
         }
     }, [doctor?.name, navigate]);
 

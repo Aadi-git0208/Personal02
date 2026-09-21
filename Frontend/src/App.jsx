@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import { GuestRoute, ProtectedRoute } from "./components/ProtectedRoute";
+import { AuthProvider } from "./auth/AuthContext";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -43,6 +45,7 @@ function App() {
     const [darkMode, setDarkMode] = useState(true);
 
     return (
+        <AuthProvider>
         <Router>
             <div className={darkMode ? "dark-mode" : "light-mode"}>
                 <Navbar
@@ -53,9 +56,23 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Home />} />
 
-                    <Route path="/login" element={<Login />} />
+                    <Route
+                        path="/login"
+                        element={(
+                            <GuestRoute>
+                                <Login />
+                            </GuestRoute>
+                        )}
+                    />
 
-                    <Route path="/register" element={<Register />} />
+                    <Route
+                        path="/register"
+                        element={(
+                            <GuestRoute>
+                                <Register />
+                            </GuestRoute>
+                        )}
+                    />
 
                     <Route
                         path="/medicine"
@@ -79,7 +96,11 @@ function App() {
 
                     <Route
                         path="/patient"
-                        element={<PatientDashboard />}
+                        element={(
+                            <ProtectedRoute roles={["patient"]}>
+                                <PatientDashboard />
+                            </ProtectedRoute>
+                        )}
                     >
                         <Route
                             index
@@ -119,7 +140,11 @@ function App() {
 
                     <Route
                         path="/doctor"
-                        element={<DoctorDashboard />}
+                        element={(
+                            <ProtectedRoute roles={["doctor"]}>
+                                <DoctorDashboard />
+                            </ProtectedRoute>
+                        )}
                     >
                         <Route
                             index
@@ -154,12 +179,20 @@ function App() {
 
                     <Route
                         path="/doctor/onboarding"
-                        element={<DoctorOnboarding />}
+                        element={(
+                            <ProtectedRoute roles={["doctor"]}>
+                                <DoctorOnboarding />
+                            </ProtectedRoute>
+                        )}
                     />
 
                     <Route
                         path="/admin"
-                        element={<AdminLayout />}
+                        element={(
+                            <ProtectedRoute roles={["admin"]}>
+                                <AdminLayout />
+                            </ProtectedRoute>
+                        )}
                     >
                         <Route
                             index
@@ -194,6 +227,7 @@ function App() {
                 </Routes>
             </div>
         </Router>
+        </AuthProvider>
     );
 }
 
