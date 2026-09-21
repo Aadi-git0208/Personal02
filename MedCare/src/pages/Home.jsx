@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Home.css";
 import Services from "../components/ServicesDashboard";
+import ScrollReveal from "../components/ui/ScrollReveal";
 
 const Home = () => {
     const aboutImages = [
@@ -58,7 +59,7 @@ const Home = () => {
                 </div>
             </section>
 
-            <section className="about-section">
+            <ScrollReveal as="section" className="about-section">
                 <h2 className="about-title">
                     About Us
                 </h2>
@@ -82,9 +83,11 @@ const Home = () => {
                         className="about-image"
                     />
                 </div>
-            </section>
+            </ScrollReveal>
 
-            <Services />
+            <ScrollReveal>
+                <Services />
+            </ScrollReveal>
 
             <footer className="site-footer">
                 <p className="footer-text">

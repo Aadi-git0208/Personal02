@@ -2,33 +2,39 @@
 
 :root {
   /* Colors - Healthcare Professional Palette */
-  --color-primary: #0ea5e9;
-  --color-primary-dark: #0284c7;
-  --color-primary-light: #38bdf8;
-  --color-secondary: #10b981;
-  --color-secondary-dark: #059669;
+  --brand-forest: #364936;
+  --brand-sage: #9A9B78;
+  --brand-cream: #E4DFCF;
+  --brand-surface: #F3F0E7;
+  --brand-charcoal: #333333;
+  --brand-muted: #6B6256;
+  --color-primary: #364936;
+  --color-primary-dark: #2B3A2B;
+  --color-primary-light: #9A9B78;
+  --color-secondary: #9A9B78;
+  --color-secondary-dark: #6F7655;
   
   /* Neutral Colors */
-  --color-background: #0f172a;
-  --color-background-light: #1e293b;
-  --color-surface: #1e293b;
-  --color-surface-elevated: #334155;
+  --color-background: #333333;
+  --color-background-light: #3D473D;
+  --color-surface: #3D473D;
+  --color-surface-elevated: #4A584A;
   
   /* Text Colors */
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-text-tertiary: #94a3b8;
-  --color-text-inverse: #0f172a;
+  --color-text-primary: #E4DFCF;
+  --color-text-secondary: #DBCDB3;
+  --color-text-tertiary: #9A9B78;
+  --color-text-inverse: #333333;
   
   /* Semantic Colors */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
+  --color-success: #6F8F68;
+  --color-warning: #C59B58;
   --color-error: #ef4444;
-  --color-info: #3b82f6;
+  --color-info: #9A9B78;
   
   /* Border & Divider */
-  --color-border: rgba(148, 163, 184, 0.2);
-  --color-border-hover: rgba(148, 163, 184, 0.4);
+  --color-border: rgba(219, 205, 179, 0.24);
+  --color-border-hover: rgba(219, 205, 179, 0.42);
   
   /* Spacing Scale (8px base) */
   --spacing-xs: 0.25rem;   /* 4px */
@@ -140,16 +146,15 @@ h1 {
   margin-top: 69px;
 }
 .cart-title {
-  color: linear-gradient(45deg, #0cafea, #00ffb3);
+  color: var(--brand-forest);
   font-family: "Playfair Display", serif;
-  background:linear-gradient(45deg, #0cafea, #00ffb3);
   align-items: center;
 }
 
 h2 {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
-  color: #c06bdb;
+  color: var(--brand-forest);
   font-family: "Playfair Display", serif;
 }
 
@@ -180,13 +185,13 @@ p {
 }
 
 a {
-  color: var(--color-primary-light);
+  color: var(--brand-forest);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 a:hover {
-  color: var(--color-primary);
+  color: var(--brand-sage);
 }
 
 /* Responsive Typography */

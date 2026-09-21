@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./BookAppointment.css";
+import ScrollReveal from "../../components/ui/ScrollReveal";
 
 const timeSlots = [
     "10:00 AM",
@@ -112,28 +113,36 @@ function BookAppointment() {
     return (
         <div className="book-appointment-page">
             <h2 className="page-title">
-                Book Appointment
+                <span>Find a Doctor</span>
+                <small>Book an appointment with the right healthcare professional.</small>
             </h2>
 
             {!selectedDoctor && (
                 <>
                     {doctors.length === 0 ? (
                         <div className="no-doctors">
+                            <div className="no-doctors-icon" aria-hidden="true">
+                                <svg width="42" height="42" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" stroke="currentColor" strokeWidth="1.7" />
+                                    <path d="M12 8v4l2.5 1.5M8.5 3.8 10 2m5.5 1.8L14 2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                                </svg>
+                            </div>
                             <p className="no-doctors-title">
-                                No doctors available at the
-                                moment.
+                                No doctors available right now
                             </p>
 
                             <p className="no-doctors-subtitle">
-                                Please check back later.
+                                Please check back later or explore other healthcare services.
                             </p>
                         </div>
                     ) : (
                         <div className="doctor-grid">
-                            {doctors.map((doc) => (
-                                <div
+                            {doctors.map((doc, index) => (
+                                <ScrollReveal
+                                    as="div"
                                     className="doctor-card"
                                     key={doc.id}
+                                    delay={index * 80}
                                 >
                                     {doc.image ? (
                                         <img
@@ -185,7 +194,7 @@ function BookAppointment() {
                                     >
                                         Book Appointment
                                     </button>
-                                </div>
+                                </ScrollReveal>
                             ))}
                         </div>
                     )}

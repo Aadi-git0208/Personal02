@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MedicineCard from "./MedicineCard";
+import ScrollReveal from "./ui/ScrollReveal";
 import "./MedicineDashboard.css";
 
 const MedicineDashboard = () => {
@@ -185,7 +186,7 @@ const MedicineDashboard = () => {
                     </p>
                 </div>
             ) : (
-                <div className="medicine-grid-vertical">
+                <ScrollReveal className="medicine-grid-vertical">
                     {filteredMedicines.map(
                         (medicine) => (
                             <MedicineCard
@@ -203,7 +204,7 @@ const MedicineDashboard = () => {
                             />
                         )
                     )}
-                </div>
+                </ScrollReveal>
             )}
         </div>
     );

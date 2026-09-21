@@ -81,14 +81,28 @@ const Prescription = ({
 
     if (!medicine) {
         return (
-            <div className="medicine-page">
-                <h1 className="medicine-title">
-                    Prescription
-                </h1>
+            <div className="medicine-page prescription-page">
+                <div className="prescription-header">
+                    <div>
+                        <h1 className="medicine-title">
+                            Prescription
+                        </h1>
+                        <p className="prescription-subtitle">
+                            View and manage your prescriptions
+                        </p>
+                    </div>
+                </div>
 
                 <div className="medicine-empty">
+                    <div className="prescription-empty-icon" aria-hidden="true">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 3h8l4 4v14H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                            <path d="M14 3v5h5M8 12h6M8 16h5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                        </svg>
+                    </div>
+                    <strong>No prescriptions yet</strong>
                     <p>
-                        No prescription available.
+                        Your prescriptions will appear here after a doctor consultation.
                     </p>
                 </div>
             </div>

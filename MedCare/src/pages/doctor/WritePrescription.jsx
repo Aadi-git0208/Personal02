@@ -35,7 +35,7 @@ export default function DoctorPrescription() {
       <style>{css}</style>
 
       <div className="page">
-        <h2>💊 Write Prescription</h2>
+        <h2> Write Prescription</h2>
 
         <div className="card">
           <input
@@ -83,17 +83,19 @@ const css = `
 .page {
   padding: 30px;
   color: white;
-  background: #0b132b;
+  background: #eae7dc;
   min-height: 100vh;
   font-family: Arial;
+  background: border-box;
 }
 
 .card {
-  background: linear-gradient(135deg, #0f3460, #16213e);
+  background: #f4efe2;
   padding: 25px;
   border-radius: 20px;
   max-width: 900px;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
+
 }
 
 input, textarea {

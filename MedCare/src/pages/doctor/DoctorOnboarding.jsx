@@ -10,7 +10,7 @@ const DoctorOnboarding = () => {
   const [experience, setExperience] = useState("");
   const [fee, setFee] = useState("");
   const [timeSlots, setTimeSlots] = useState([]);
-  const [availableSlots, setAvailableSlots] = useState([
+  const [availableSlots, __] = useState([
     "10:00 AM",
     "11:00 AM",
     "12:00 PM",

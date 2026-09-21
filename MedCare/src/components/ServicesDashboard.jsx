@@ -16,37 +16,37 @@ const Services = () => {
             icon: <FaUserMd />,
             title: "Online Consultation",
             description: "Consult certified doctors anytime via video or chat.",
-            iconColor: "#0ea5e9"
+            iconColor: "#16A34A"
         },
         {
             icon: <FaCalendarCheck />,
             title: "Appointment Booking",
             description: "Book hospital and clinic appointments easily.",
-            iconColor: "#10b981"
+            iconColor: "#22C55E"
         },
         {
             icon: <FaPills />,
             title: "Medicine Delivery",
             description: "Order medicines online with doorstep delivery.",
-            iconColor: "#3b82f6"
+            iconColor: "#10B991"
         },
         {
             icon: <FaVial />,
             title: "Diagnostic Tests",
             description: "Book lab tests and access reports digitally.",
-            iconColor: "#8b5cf6"
+            iconColor: "#16A34A"
         },
         {
             icon: <FaFileMedical />,
             title: "Health Records",
             description: "Securely store prescriptions and medical history.",
-            iconColor: "#06b6d4"
+            iconColor: "#10B991"
         },
         {
             icon: <FaAmbulance />,
             title: "Emergency SOS",
             description: "One-click emergency assistance and ambulance help.",
-            iconColor: "#ef4444"
+            iconColor: "#22C55E"
         }
     ];
 

@@ -1,8 +1,8 @@
 .dark-mode {
     min-height: 100vh;
     width: 100%;
-    background-color: #04142f;
-    color: #ffffff;
+    background-color: #333333;
+    color: #E4DFCF;
     font-family: "Segoe UI", system-ui, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -10,8 +10,8 @@
 .light-mode {
     min-height: 100vh;
     width: 100%;
-    background-color: #ffffff;
-    color: #222222;
+    background-color: #E4DFCF;
+    color: #333333;
     font-family: "Segoe UI", system-ui, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -38,13 +38,13 @@
 }
 
 .light-mode .theme-button {
-    background-color: #04142f;
-    color: #ffffff;
+    background-color: #364936;
+    color: #E4DFCF;
 }
 
 .dark-mode .theme-button {
-    background-color: #ffffff;
-    color: #04142f;
+    background-color: #DBCDB3;
+    color: #333333;
 }
 
 .app {
@@ -59,6 +59,254 @@
 
 .light-mode button {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Keep legacy page surfaces on the same MedCare palette. */
+.dark-mode .medicine-page,
+.dark-mode .admin-page,
+.dark-mode .patient-dashboard,
+.dark-mode .doctor-dashboard,
+.dark-mode .services-section {
+    background: linear-gradient(135deg, var(--brand-charcoal), var(--brand-forest));
+    color: var(--brand-cream);
+}
+
+.light-mode .medicine-page,
+.light-mode .admin-page,
+.light-mode .patient-dashboard,
+.light-mode .doctor-dashboard,
+.light-mode .services-section {
+    background: linear-gradient(135deg, var(--brand-cream), var(--brand-sage));
+    color: var(--brand-charcoal);
+}
+
+.dark-mode .card,
+.dark-mode .medicine-card-vertical,
+.dark-mode .doctor-card,
+.dark-mode .booking-form,
+.dark-mode .chat-box,
+.dark-mode .appointment-card,
+.dark-mode .feature-card,
+.dark-mode .table-card,
+.dark-mode .patient-list,
+.dark-mode .admin-section,
+.dark-mode .admin-stat-card,
+.dark-mode .admin-link-card,
+.dark-mode .onboarding-form {
+    background: linear-gradient(145deg, var(--brand-surface), var(--brand-forest));
+    color: var(--brand-cream);
+    border-color: var(--color-border);
+    box-shadow: 0 14px 32px rgba(54, 73, 54, 0.28);
+}
+
+.light-mode .card,
+.light-mode .medicine-card-vertical,
+.light-mode .doctor-card,
+.light-mode .booking-form,
+.light-mode .chat-box,
+.light-mode .appointment-card,
+.light-mode .feature-card,
+.light-mode .table-card,
+.light-mode .patient-list,
+.light-mode .admin-section,
+.light-mode .admin-stat-card,
+.light-mode .admin-link-card,
+.light-mode .onboarding-form {
+    background: linear-gradient(145deg, var(--brand-surface), var(--brand-cream));
+    color: var(--brand-charcoal);
+    border-color: var(--brand-sage);
+    box-shadow: 0 14px 32px rgba(54, 73, 54, 0.14);
+}
+
+.dark-mode .medicine-title,
+.dark-mode .admin-page h1,
+.dark-mode .admin-section h2,
+.dark-mode .medicine-card-price,
+.dark-mode .admin-stat-card p,
+.dark-mode .specialization,
+.dark-mode .dashboard-icon {
+    color: var(--brand-sage);
+}
+
+.light-mode .medicine-title,
+.light-mode .admin-page h1,
+.light-mode .admin-section h2,
+.light-mode .medicine-card-price,
+.light-mode .admin-stat-card p,
+.light-mode .specialization,
+.light-mode .dashboard-icon {
+    color: var(--brand-forest);
+}
+
+.dark-mode .medicine-search,
+.dark-mode .quantity-select,
+.dark-mode .doctor-select,
+.dark-mode .booking-form input,
+.dark-mode .booking-form select,
+.dark-mode .chat-input input,
+.dark-mode .onboarding-form input,
+.dark-mode .onboarding-form select,
+.dark-mode .admin-input {
+    background: var(--brand-charcoal);
+    color: var(--brand-cream);
+    border-color: var(--brand-sage);
+}
+
+.light-mode .medicine-search,
+.light-mode .quantity-select,
+.light-mode .doctor-select,
+.light-mode .booking-form input,
+.light-mode .booking-form select,
+.light-mode .chat-input input,
+.light-mode .onboarding-form input,
+.light-mode .onboarding-form select,
+.light-mode .admin-input {
+    background: var(--brand-surface);
+    color: var(--brand-charcoal);
+    border-color: var(--brand-sage);
+}
+
+.dark-mode .medicine-cart-btn,
+.dark-mode .add-cart-btn-vertical,
+.dark-mode .buy-now-btn,
+.dark-mode .feedback-btn,
+.dark-mode .message-btn,
+.dark-mode .admin-btn,
+.dark-mode .btn-submit,
+.dark-mode .btn-add-slot,
+.dark-mode .chat-input button,
+.dark-mode .doctor-card button {
+    background: var(--brand-sage);
+    color: var(--brand-charcoal);
+}
+
+.light-mode .medicine-cart-btn,
+.light-mode .add-cart-btn-vertical,
+.light-mode .buy-now-btn,
+.light-mode .feedback-btn,
+.light-mode .message-btn,
+.light-mode .admin-btn,
+.light-mode .btn-submit,
+.light-mode .btn-add-slot,
+.light-mode .chat-input button,
+.light-mode .doctor-card button {
+    background: var(--brand-forest);
+    color: var(--brand-cream);
+}
+
+.light-mode .service-card {
+    background: linear-gradient(145deg, var(--brand-surface), var(--brand-cream));
+    color: var(--brand-charcoal);
+    border-color: var(--brand-sage);
+}
+
+.dark-mode .service-card {
+    background: linear-gradient(145deg, #3D473D, #1F2A23);
+    color: #F4EFE2;
+    border-color: #9A9B78;
+}
+
+.dashboard-sidebar-toggle {
+    position: fixed;
+    top: 12px;
+    left: 20px;
+    z-index: 1004;
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0;
+    border: 1px solid rgba(63, 74, 50, 0.24);
+    border-radius: 8px;
+    background: #F4EFE2;
+    color: #2F3A2F;
+    cursor: pointer;
+    box-shadow: 0 5px 16px rgba(30, 29, 23, 0.12);
+    transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease, transform 250ms ease;
+}
+
+.dashboard-sidebar-toggle:hover {
+    border-color: #818C5A;
+    transform: translateY(-1px);
+}
+
+.dashboard-sidebar-toggle span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 250ms ease, opacity 250ms ease;
+}
+
+.dark-mode .dashboard-sidebar-toggle {
+    border-color: rgba(244, 239, 226, 0.28);
+    background: #1F2A23;
+    color: #F4EFE2;
+}
+
+.sidebar-is-open .dashboard-sidebar-toggle span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.sidebar-is-open .dashboard-sidebar-toggle span:nth-child(2) {
+    opacity: 0;
+}
+
+.sidebar-is-open .dashboard-sidebar-toggle span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+.dashboard-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background: rgba(15, 23, 18, 0.42);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease;
+}
+
+.sidebar-is-open .dashboard-sidebar-overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.patient-sidebar,
+.doctor-sidebar,
+.admin-sidebar {
+    transform: translateX(-100%);
+    transition: transform 300ms ease;
+    z-index: 1002;
+}
+
+.sidebar-is-open .patient-sidebar,
+.sidebar-is-open .doctor-sidebar,
+.sidebar-is-open .admin-sidebar {
+    transform: translateX(0);
+}
+
+.patient-portal-shell > .patient-dashboard,
+.doctor-portal-shell > .doctor-dashboard,
+.admin-main {
+    max-width: none;
+    margin-left: 0;
+}
+
+@media (max-width: 760px) {
+    .patient-sidebar,
+    .doctor-sidebar,
+    .admin-sidebar {
+        display: flex;
+    }
+
+    .dashboard-sidebar-toggle {
+        top: 12px;
+        left: 14px;
+    }
 }
 
 @media (max-width: 768px) {

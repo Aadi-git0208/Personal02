@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 const Navbar = ({ darkMode, setDarkMode }) => {
@@ -14,6 +14,10 @@ const Navbar = ({ darkMode, setDarkMode }) => {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPortalRoute = ["/patient", "/doctor", "/admin"].some((route) =>
+    location.pathname === route || location.pathname.startsWith(`${route}/`)
+  );
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -108,6 +112,12 @@ const Navbar = ({ darkMode, setDarkMode }) => {
             MediCurex
           </h1>
         </Link>
+
+        {isPortalRoute && (
+          <Link to="/" className="navbar__center-title">
+            MediCurex
+          </Link>
+        )}
 
         <button
           className="navbar__mobile-toggle"
