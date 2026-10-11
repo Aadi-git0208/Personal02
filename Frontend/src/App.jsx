@@ -15,6 +15,7 @@ import MyAppointment from "./pages/patient/MyAppointment";
 import ChatWithDoctor from "./pages/patient/ChatWithDoctor";
 import Pharmacy from "./pages/patient/Pharmacy";
 import Prescription from "./pages/patient/Prescription";
+import PatientProfile from "./pages/patient/PatientProfile";
 
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
@@ -135,6 +136,11 @@ function App() {
                         <Route
                             path="prescription"
                             element={<Prescription />}
+                        />
+
+                        <Route
+                            path="profile"
+                            element={<PatientProfile />}
                         />
                     </Route>
 

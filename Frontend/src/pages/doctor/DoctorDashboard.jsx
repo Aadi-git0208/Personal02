@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
+import { getApiErrorMessage, pageContent } from "../../api/client";
+import {
+    completeAppointment,
+    confirmAppointment,
+    listDoctorAppointments,
+    rejectAppointment
+} from "../../api/appointmentApi";
+import { useAuth } from "../../auth/AuthContext";
 import "./DoctorDashboard.css";
 import ScrollReveal from "../../components/ui/ScrollReveal";
 
@@ -38,35 +46,50 @@ const navItems = [
 const DoctorDashboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { user: doctor } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const allAppointments = JSON.parse(localStorage.getItem("appointments")) || [];
-    const doctor = JSON.parse(localStorage.getItem("currentUser")) || {};
-
-    const appointments = allAppointments.filter(
-        (appointment) =>
-            appointment.doctorId === doctor.id ||
-            appointment.doctorId === doctor.userId ||
-            appointment.doctorUserId === doctor.id ||
-            appointment.doctorUserId === doctor.userId
-    );
+    const [appointments, setAppointments] = useState([]);
+    const [error, setError] = useState("");
+    const [pendingId, setPendingId] = useState(null);
 
     useEffect(() => {
-        if (!doctor?.name) {
-            navigate("/login");
+        let cancelled = false;
+
+        async function loadAppointments() {
+            try {
+                const page = await listDoctorAppointments({ size: 50, sort: "appointmentDate,desc" });
+                if (!cancelled) {
+                    setAppointments(pageContent(page));
+                }
+            } catch (loadError) {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(loadError));
+                }
+            }
         }
-    }, [doctor?.name, navigate]);
+
+        loadAppointments();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const isChildRoute = location.pathname !== "/doctor" && location.pathname !== "/doctor/";
-    const pending = appointments.filter((appointment) => appointment.status === "pending");
-    const confirmed = appointments.filter((appointment) => appointment.status === "confirmed");
+    const pending = appointments.filter((appointment) => appointment.status === "PENDING");
+    const confirmed = appointments.filter((appointment) => appointment.status === "CONFIRMED");
 
-    const updateStatus = (id, status) => {
-        const updatedAppointments = allAppointments.map((appointment) =>
-            appointment.id === id ? { ...appointment, status } : appointment
-        );
-
-        localStorage.setItem("appointments", JSON.stringify(updatedAppointments));
-        window.location.reload();
+    const runAction = async (id, action) => {
+        setPendingId(id);
+        setError("");
+        try {
+            await action();
+            const page = await listDoctorAppointments({ size: 50, sort: "appointmentDate,desc" });
+            setAppointments(pageContent(page));
+        } catch (actionError) {
+            setError(getApiErrorMessage(actionError));
+        } finally {
+            setPendingId(null);
+        }
     };
 
     const name = doctor?.name || "Doctor";
@@ -112,7 +135,7 @@ const DoctorDashboard = () => {
 
                 <div className="doctor-sidebar-secondary">
                     <p className="doctor-sidebar-label">Personal</p>
-                    <span className="doctor-sidebar-link doctor-sidebar-link--disabled" aria-disabled="true"><Icon name="profile" size={18} /><span>Profile</span></span>
+                    <Link to="/doctor/onboarding" className="doctor-sidebar-link"><Icon name="profile" size={18} /><span>Profile</span></Link>
                     <span className="doctor-sidebar-link doctor-sidebar-link--disabled" aria-disabled="true"><Icon name="settings" size={18} /><span>Settings</span></span>
                 </div>
 
@@ -130,6 +153,10 @@ const DoctorDashboard = () => {
                                 <p className="doctor-eyebrow">CLINICAL WORKSPACE</p>
                                 <h1>Welcome, {name} <span aria-hidden="true"></span></h1>
                                 <p className="doctor-subtitle">Here is your daily overview.</p>
+                                {doctor?.approvalStatus === "PENDING" && (
+                                    <p>Your profile is pending administrator approval.</p>
+                                )}
+                                {error && <p role="alert">{error}</p>}
                             </div>
                             <div className="doctor-header-mark" aria-hidden="true"><Icon name="doctor" size={24} /></div>
                         </header>
@@ -171,9 +198,21 @@ const DoctorDashboard = () => {
                                 <div className="table-wrapper"><table><thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr></thead><tbody>
                                     {appointments.map((appointment) => (
                                         <tr key={appointment.id}>
-                                            <td>{appointment.patientName}</td><td>{appointment.date}</td><td>{appointment.time}</td>
-                                            <td><span className={`status ${appointment.status}`}>{appointment.status}</span></td>
-                                            <td>{appointment.status === "pending" && <div className="action-buttons"><button className="btn accept" onClick={() => updateStatus(appointment.id, "confirmed")}>Accept</button><button className="btn reject" onClick={() => updateStatus(appointment.id, "cancelled")}>Reject</button></div>}</td>
+                                            <td>Patient #{appointment.patientUserId}</td>
+                                            <td>{appointment.appointmentDate}</td>
+                                            <td>{appointment.slotLabel || `${appointment.startTime}–${appointment.endTime}`}</td>
+                                            <td><span className={`status ${String(appointment.status || "").toLowerCase()}`}>{appointment.status}</span></td>
+                                            <td>
+                                                {appointment.status === "PENDING" && (
+                                                    <div className="action-buttons">
+                                                        <button className="btn accept" disabled={pendingId === appointment.id} onClick={() => runAction(appointment.id, () => confirmAppointment(appointment.id))}>Accept</button>
+                                                        <button className="btn reject" disabled={pendingId === appointment.id} onClick={() => runAction(appointment.id, () => rejectAppointment(appointment.id, "Rejected by doctor"))}>Reject</button>
+                                                    </div>
+                                                )}
+                                                {appointment.status === "CONFIRMED" && (
+                                                    <button className="btn accept" disabled={pendingId === appointment.id} onClick={() => runAction(appointment.id, () => completeAppointment(appointment.id))}>Complete</button>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody></table></div>

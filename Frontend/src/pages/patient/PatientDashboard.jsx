@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
 import "./PatientDashboard.css";
 import ScrollReveal from "../../components/ui/ScrollReveal";
 
@@ -37,7 +38,7 @@ const navItems = [
 ];
 
 function PatientDashboard() {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
+    const { user } = useAuth();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const name = user?.name || "Patient";
@@ -83,10 +84,10 @@ function PatientDashboard() {
 
                 <div className="patient-sidebar-secondary">
                     <p className="patient-sidebar-label">Personal</p>
-                    <span className="patient-sidebar-link patient-sidebar-link--disabled" aria-disabled="true">
+                    <Link to="/patient/profile" className="patient-sidebar-link">
                         <Icon name="profile" size={18} />
                         <span>Profile</span>
-                    </span>
+                    </Link>
                     <span className="patient-sidebar-link patient-sidebar-link--disabled" aria-disabled="true">
                         <Icon name="settings" size={18} />
                         <span>Settings</span>

@@ -1,192 +1,127 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MedicineCard from "../../components/MedicineCard";
 import "../../components/MedicineDashboard.css";
+import { getApiErrorMessage, pageContent } from "../../api/client";
+import { addCartItem } from "../../api/cart";
+import { listMedicineCategories, listMedicines } from "../../api/pharmacyApi";
+import { useAuth } from "../../auth/AuthContext";
 
 const Pharmacy = () => {
     const navigate = useNavigate();
-
-    const user =
-        JSON.parse(localStorage.getItem("currentUser")) ||
-        null;
-
+    const { user } = useAuth();
     const [medicines, setMedicines] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [search, setSearch] = useState("");
+    const [category, setCategory] = useState("");
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState("");
+    const [notice, setNotice] = useState("");
 
     useEffect(() => {
-        const loadMedicines = () => {
+        let cancelled = false;
+        async function loadCategories() {
             try {
-                const storedMedicines =
-                    JSON.parse(
-                        localStorage.getItem("medicines")
-                    ) || [];
-
-                setMedicines(storedMedicines);
-                setLoading(false);
-                setError(null);
-            } catch (error) {
-                console.error(
-                    "Error loading medicines:",
-                    error
-                );
-
-                setError(
-                    "Failed to load medicines. Please try again later."
-                );
-
-                setLoading(false);
+                const result = await listMedicineCategories();
+                if (!cancelled) {
+                    setCategories(result?.categories || []);
+                }
+            } catch {
+                if (!cancelled) {
+                    setCategories([]);
+                }
             }
-        };
-
-        loadMedicines();
-
-        window.addEventListener(
-            "storage",
-            loadMedicines
-        );
-
-        const interval = setInterval(
-            loadMedicines,
-            1000
-        );
-
+        }
+        loadCategories();
         return () => {
-            window.removeEventListener(
-                "storage",
-                loadMedicines
-            );
-
-            clearInterval(interval);
+            cancelled = true;
         };
     }, []);
 
-    const handleAddToCart = (
-        medicine,
-        quantity = 1
-    ) => {
-        if (!user) {
-            alert("Please login to buy medicines");
-            navigate("/login");
-            return;
-        }
-
-        if (user.role !== "patient") {
-            alert("Only patients can buy medicines");
-            return;
-        }
-
-        try {
-            const cart =
-                JSON.parse(
-                    localStorage.getItem("cart")
-                ) || [];
-
-            const exists = cart.find(
-                (item) => item.id === medicine.id
-            );
-
-            let updatedCart;
-
-            if (exists) {
-                updatedCart = cart.map((item) =>
-                    item.id === medicine.id
-                        ? {
-                              ...item,
-                              quantity:
-                                  item.quantity +
-                                  quantity
-                          }
-                        : item
-                );
-            } else {
-                updatedCart = [
-                    ...cart,
-                    {
-                        ...medicine,
-                        quantity: quantity
-                    }
-                ];
+    useEffect(() => {
+        let cancelled = false;
+        async function loadMedicines() {
+            setLoading(true);
+            setError("");
+            try {
+                const result = await listMedicines({
+                    q: search.trim() || undefined,
+                    category: category || undefined,
+                    page,
+                    size: 12,
+                    sort: "name,asc"
+                });
+                if (!cancelled) {
+                    setMedicines(pageContent(result));
+                    setTotalPages(result?.totalPages || 0);
+                }
+            } catch (loadError) {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(loadError));
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
-
-            localStorage.setItem(
-                "cart",
-                JSON.stringify(updatedCart)
-            );
-
-            alert(
-                `${medicine.name} (${quantity}x) added to cart!`
-            );
-        } catch (error) {
-            console.error(
-                "Error adding to cart:",
-                error
-            );
-
-            alert(
-                "Failed to add medicine to cart. Please try again."
-            );
         }
+        const handle = setTimeout(loadMedicines, 250);
+        return () => {
+            cancelled = true;
+            clearTimeout(handle);
+        };
+    }, [search, category, page]);
+
+    const handleAddToCart = (medicine, quantity = 1) => {
+        addCartItem(medicine, quantity);
+        setNotice(`${medicine.name} added to cart.`);
     };
-
-    if (loading) {
-        return (
-            <div className="medicine-page">
-                <h1 className="medicine-title">
-                    Pharmacy
-                </h1>
-
-                <div className="pharmacy-message">
-                    <p>Loading medicines...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="medicine-page">
-                <h1 className="medicine-title">
-                    Pharmacy
-                </h1>
-
-                <div className="pharmacy-message pharmacy-error">
-                    <p>{error}</p>
-
-                    <button
-                        className="add-cart-btn-vertical pharmacy-retry-btn"
-                        onClick={() =>
-                            window.location.reload()
-                        }
-                    >
-                        Retry
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="medicine-page">
-            <h1 className="medicine-title">
-                Pharmacy
-            </h1>
-
-            <h2 className="pharmacy-heading">
-                Available Medicines
-            </h2>
-
-            {medicines.length === 0 ? (
+            <h1 className="medicine-title">Pharmacy</h1>
+            <div className="medicine-top-bar">
+                <input
+                    type="text"
+                    placeholder="Search medicines..."
+                    className="medicine-search"
+                    value={search}
+                    onChange={(event) => {
+                        setSearch(event.target.value);
+                        setPage(0);
+                    }}
+                />
+                <select
+                    className="medicine-search"
+                    value={category}
+                    onChange={(event) => {
+                        setCategory(event.target.value);
+                        setPage(0);
+                    }}
+                >
+                    <option value="">All categories</option>
+                    {categories.map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                    ))}
+                </select>
+                <button className="medicine-cart-btn" onClick={() => navigate("/cart")}>
+                    Cart
+                </button>
+            </div>
+            {notice && <p>{notice}</p>}
+            {loading && <p>Loading medicines...</p>}
+            {error && (
+                <div className="pharmacy-message pharmacy-error">
+                    <p>{error}</p>
+                </div>
+            )}
+            <h2 className="pharmacy-heading">Available Medicines</h2>
+            {!loading && medicines.length === 0 ? (
                 <div className="pharmacy-empty">
-                    <p className="pharmacy-empty-title">
-                        No medicines available at the
-                        moment.
-                    </p>
-
-                    <p className="pharmacy-empty-subtitle">
-                        Please check back later or
-                        contact the administrator.
-                    </p>
+                    <p className="pharmacy-empty-title">No medicines available at the moment.</p>
+                    <p className="pharmacy-empty-subtitle">Please check back later or contact the administrator.</p>
                 </div>
             ) : (
                 <div className="medicine-grid-vertical">
@@ -194,15 +129,22 @@ const Pharmacy = () => {
                         <MedicineCard
                             key={medicine.id}
                             medicine={medicine}
-                            onAddToCart={
-                                handleAddToCart
-                            }
+                            onAddToCart={handleAddToCart}
+                            onBuyNow={(item, quantity) => {
+                                handleAddToCart(item, quantity);
+                                navigate("/cart");
+                            }}
                             showAddToCart={true}
-                            userRole={
-                                user?.role || null
-                            }
+                            userRole={user?.role || null}
                         />
                     ))}
+                </div>
+            )}
+            {totalPages > 1 && (
+                <div>
+                    <button type="button" disabled={page <= 0} onClick={() => setPage((current) => current - 1)}>Previous</button>
+                    <span> Page {page + 1} of {totalPages} </span>
+                    <button type="button" disabled={page + 1 >= totalPages} onClick={() => setPage((current) => current + 1)}>Next</button>
                 </div>
             )}
         </div>

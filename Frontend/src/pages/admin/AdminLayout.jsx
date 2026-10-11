@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Outlet, Navigate, Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../auth/AuthContext";
 import "./Admin.css";
 
 const AdminIcon = ({ name }) => {
@@ -16,7 +17,7 @@ const AdminIcon = ({ name }) => {
 };
 
 const AdminLayout = () => {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  const { user } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

@@ -33,20 +33,7 @@ export function clearSession() {
 }
 
 export function hasDoctorProfile(user) {
-    if (!user?.id) {
-        return false;
-    }
-
-    try {
-        const profiles = JSON.parse(localStorage.getItem("doctorProfiles")) || [];
-        return profiles.some(
-            (profile) =>
-                String(profile.id) === String(user.id) ||
-                String(profile.userId) === String(user.id)
-        );
-    } catch {
-        return false;
-    }
+    return Boolean(user?.profileCompleted);
 }
 
 export function getDashboardPath(user) {
@@ -62,5 +49,5 @@ export function getDashboardPath(user) {
         return hasDoctorProfile(user) ? "/doctor" : "/doctor/onboarding";
     }
 
-    return "/patient/dashboard";
+    return "/patient";
 }
