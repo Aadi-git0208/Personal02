@@ -1,114 +1,151 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getApiErrorMessage } from "../../api/client";
+import { getDoctorDirectory } from "../../api/profileApi";
+import {
+    createAppointment,
+    getDoctorAvailability,
+    parseSlotTimes
+} from "../../api/appointmentApi";
+import { useAuth } from "../../auth/AuthContext";
 import "./BookAppointment.css";
 import ScrollReveal from "../../components/ui/ScrollReveal";
 
-const timeSlots = [
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "02:00 PM",
-    "04:00 PM"
-];
+function localIsoDate(offsetDays = 0) {
+    const date = new Date();
+    date.setDate(date.getDate() + offsetDays);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function isSlotBooked(slotLabel, bookedRanges) {
+    const times = parseSlotTimes(slotLabel);
+    if (!times || !Array.isArray(bookedRanges)) {
+        return false;
+    }
+
+    return bookedRanges.some((range) => {
+        const start = String(range.startTime || "");
+        return start === times.startTime || start.startsWith(times.startTime.slice(0, 5));
+    });
+}
 
 function BookAppointment() {
     const navigate = useNavigate();
-
-    const patient =
-        JSON.parse(localStorage.getItem("currentUser")) || {};
+    const { user } = useAuth();
 
     const [doctors, setDoctors] = useState([]);
     const [selectedDoctor, setSelectedDoctor] = useState(null);
-    const [patientName, setPatientName] = useState(
-        patient.name || ""
-    );
-    const [patientAge, setPatientAge] = useState("");
+    const [appointmentDate, setAppointmentDate] = useState(() => localIsoDate(1));
     const [slot, setSlot] = useState("");
+    const [reason, setReason] = useState("");
+    const [notes, setNotes] = useState("");
+    const [availability, setAvailability] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-        const loadDoctors = () => {
-            try {
-                const doctorProfiles =
-                    JSON.parse(
-                        localStorage.getItem("doctorProfiles")
-                    ) || [];
+        let cancelled = false;
 
-                setDoctors(doctorProfiles);
-            } catch (error) {
-                console.error(
-                    "Error loading doctors:",
-                    error
-                );
+        async function loadDoctors() {
+            setLoading(true);
+            setError("");
+            try {
+                const directory = await getDoctorDirectory();
+                if (!cancelled) {
+                    setDoctors(Array.isArray(directory) ? directory : []);
+                }
+            } catch (loadError) {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(loadError));
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
-        };
+        }
 
         loadDoctors();
-
-        const interval = setInterval(loadDoctors, 1000);
-
-        window.addEventListener(
-            "storage",
-            loadDoctors
-        );
-
         return () => {
-            clearInterval(interval);
-
-            window.removeEventListener(
-                "storage",
-                loadDoctors
-            );
+            cancelled = true;
         };
     }, []);
 
-    const confirmAppointment = () => {
-        if (!patientName || !patientAge || !slot) {
-            alert("Please fill all details");
-            return;
+    useEffect(() => {
+        if (!selectedDoctor?.id || !appointmentDate) {
+            setAvailability(null);
+            return undefined;
         }
 
-        if (!patient?.id) {
-            alert("Please login to book appointment");
+        let cancelled = false;
+
+        async function loadAvailability() {
+            try {
+                const result = await getDoctorAvailability(selectedDoctor.id, appointmentDate);
+                if (!cancelled) {
+                    setAvailability(result);
+                }
+            } catch {
+                if (!cancelled) {
+                    setAvailability(null);
+                }
+            }
+        }
+
+        loadAvailability();
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedDoctor, appointmentDate]);
+
+    const slots = useMemo(() => {
+        if (availability?.advertisedSlots?.length) {
+            return availability.advertisedSlots;
+        }
+        return selectedDoctor?.availabilitySlots || [];
+    }, [availability, selectedDoctor]);
+
+    async function confirmBooking() {
+        setError("");
+
+        if (!user?.id) {
             navigate("/login");
             return;
         }
 
-        const appointment = {
-            id: Date.now().toString(),
-            appointmentId: Date.now().toString(),
-            doctorId: selectedDoctor.id,
-            doctorUserId: selectedDoctor.userId,
-            doctorName: selectedDoctor.name,
-            doctorEmail: selectedDoctor.email,
-            specialization: selectedDoctor.specialization,
-            fee: selectedDoctor.fee,
-            patientId: patient.id,
-            patientName: patientName,
-            patientAge: patientAge,
-            slot: slot,
-            time: slot,
-            date: new Date().toLocaleDateString(),
-            status: "pending",
-            createdAt: new Date().toISOString()
-        };
+        if (!selectedDoctor?.id || !appointmentDate || !slot || !reason.trim()) {
+            setError("Please choose a date, time slot, and reason for visit.");
+            return;
+        }
 
-        const existing =
-            JSON.parse(
-                localStorage.getItem("appointments")
-            ) || [];
+        const times = parseSlotTimes(slot);
+        if (!times) {
+            setError("The selected time slot is not in a recognized format.");
+            return;
+        }
 
-        localStorage.setItem(
-            "appointments",
-            JSON.stringify([
-                ...existing,
-                appointment
-            ])
-        );
-
-        alert("Appointment booked successfully!");
-
-        navigate("/patient/my-appointment");
-    };
+        setSubmitting(true);
+        try {
+            await createAppointment({
+                doctorProfileId: selectedDoctor.id,
+                appointmentDate,
+                startTime: times.startTime,
+                endTime: times.endTime,
+                slotLabel: slot,
+                reason: reason.trim(),
+                notes: notes.trim() || undefined
+            });
+            navigate("/patient/my-appointment");
+        } catch (bookingError) {
+            setError(getApiErrorMessage(bookingError));
+        } finally {
+            setSubmitting(false);
+        }
+    }
 
     return (
         <div className="book-appointment-page">
@@ -117,7 +154,10 @@ function BookAppointment() {
                 <small>Book an appointment with the right healthcare professional.</small>
             </h2>
 
-            {!selectedDoctor && (
+            {error && <p role="alert">{error}</p>}
+            {loading && <p>Loading approved doctors...</p>}
+
+            {!selectedDoctor && !loading && (
                 <>
                     {doctors.length === 0 ? (
                         <div className="no-doctors">
@@ -130,9 +170,8 @@ function BookAppointment() {
                             <p className="no-doctors-title">
                                 No doctors available right now
                             </p>
-
                             <p className="no-doctors-subtitle">
-                                Please check back later or explore other healthcare services.
+                                Approved doctors will appear here after an administrator reviews their profiles.
                             </p>
                         </div>
                     ) : (
@@ -144,54 +183,19 @@ function BookAppointment() {
                                     key={doc.id}
                                     delay={index * 80}
                                 >
-                                    {doc.image ? (
-                                        <img
-                                            src={doc.image}
-                                            alt={doc.name}
-                                        />
-                                    ) : (
-                                        <div className="doctor-placeholder">
-                                            {doc.name
-                                                ?.charAt(0)
-                                                .toUpperCase()}
-                                        </div>
+                                    <div className="doctor-placeholder">
+                                        {doc.fullName?.charAt(0).toUpperCase()}
+                                    </div>
+                                    <h3>{doc.fullName}</h3>
+                                    <p className="specialization">{doc.specialization}</p>
+                                    <p className="info">Experience: {doc.experienceYears} years</p>
+                                    <p className="info">Fee: ₹{doc.consultationFee}</p>
+                                    {doc.availabilitySlots?.length > 0 && (
+                                        <p className="info available-slots">
+                                            Available: {doc.availabilitySlots.join(", ")}
+                                        </p>
                                     )}
-
-                                    <h3>
-                                        {doc.name}
-                                    </h3>
-
-                                    <p className="specialization">
-                                        {doc.specialization}
-                                    </p>
-
-                                    <p className="info">
-                                        Experience:{" "}
-                                        {doc.experience}
-                                    </p>
-
-                                    <p className="info">
-                                        Fee: ₹{doc.fee}
-                                    </p>
-
-                                    {doc.timeSlots &&
-                                        doc.timeSlots.length >
-                                            0 && (
-                                            <p className="info available-slots">
-                                                Available:{" "}
-                                                {doc.timeSlots.join(
-                                                    ", "
-                                                )}
-                                            </p>
-                                        )}
-
-                                    <button
-                                        onClick={() =>
-                                            setSelectedDoctor(
-                                                doc
-                                            )
-                                        }
-                                    >
+                                    <button onClick={() => setSelectedDoctor(doc)}>
                                         Book Appointment
                                     </button>
                                 </ScrollReveal>
@@ -204,71 +208,49 @@ function BookAppointment() {
             {selectedDoctor && (
                 <div className="booking-wrapper">
                     <div className="booking-form">
-                        <h3>
-                            {selectedDoctor.name}
-                        </h3>
-
+                        <h3>{selectedDoctor.fullName}</h3>
+                        <p className="info">{selectedDoctor.specialization}</p>
                         <input
-                            type="text"
-                            placeholder="Patient Name"
-                            value={patientName}
-                            onChange={(e) =>
-                                setPatientName(
-                                    e.target.value
-                                )
-                            }
+                            type="date"
+                            min={localIsoDate(0)}
+                            value={appointmentDate}
+                            onChange={(event) => {
+                                setAppointmentDate(event.target.value);
+                                setSlot("");
+                            }}
+                            required
                         />
-
-                        <input
-                            type="number"
-                            placeholder="Patient Age"
-                            value={patientAge}
-                            onChange={(e) =>
-                                setPatientAge(
-                                    e.target.value
-                                )
-                            }
-                        />
-
                         <select
                             value={slot}
-                            onChange={(e) =>
-                                setSlot(e.target.value)
-                            }
+                            onChange={(event) => setSlot(event.target.value)}
                         >
-                            <option value="">
-                                Select Time Slot
-                            </option>
-
-                            {selectedDoctor?.timeSlots &&
-                            selectedDoctor.timeSlots
-                                .length > 0
-                                ? selectedDoctor.timeSlots.map(
-                                      (time) => (
-                                          <option
-                                              key={time}
-                                              value={time}
-                                          >
-                                              {time}
-                                          </option>
-                                      )
-                                  )
-                                : timeSlots.map(
-                                      (time) => (
-                                          <option
-                                              key={time}
-                                              value={time}
-                                          >
-                                              {time}
-                                          </option>
-                                      )
-                                  )}
+                            <option value="">Select Time Slot</option>
+                            {slots.map((time) => {
+                                const booked = isSlotBooked(time, availability?.bookedRanges);
+                                return (
+                                    <option key={time} value={time} disabled={booked}>
+                                        {time}{booked ? " (unavailable)" : ""}
+                                    </option>
+                                );
+                            })}
                         </select>
-
-                        <button
-                            onClick={confirmAppointment}
-                        >
-                            Confirm Appointment
+                        <input
+                            type="text"
+                            placeholder="Reason for visit"
+                            value={reason}
+                            onChange={(event) => setReason(event.target.value)}
+                            required
+                        />
+                        <textarea
+                            placeholder="Notes (optional)"
+                            value={notes}
+                            onChange={(event) => setNotes(event.target.value)}
+                        />
+                        <button type="button" onClick={confirmBooking} disabled={submitting}>
+                            {submitting ? "Booking..." : "Confirm Appointment"}
+                        </button>
+                        <button type="button" onClick={() => setSelectedDoctor(null)} disabled={submitting}>
+                            Back to doctors
                         </button>
                     </div>
                 </div>

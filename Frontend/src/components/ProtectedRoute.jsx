@@ -34,6 +34,14 @@ export function ProtectedRoute({ children, roles }) {
         return <Navigate to={getDashboardPath(user)} replace />;
     }
 
+    if (
+        user.role === "doctor" &&
+        !user.profileCompleted &&
+        !location.pathname.startsWith("/doctor/onboarding")
+    ) {
+        return <Navigate to="/doctor/onboarding" replace />;
+    }
+
     return children;
 }
 

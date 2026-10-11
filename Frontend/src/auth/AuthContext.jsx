@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getCurrentUser, loginUser, registerUser } from "../api/authApi";
+import { ApiError } from "../api/client";
+import { getDoctorProfile } from "../api/profileApi";
 import {
     clearSession,
     getDashboardPath,
@@ -9,6 +11,37 @@ import {
 } from "./session";
 
 const AuthContext = createContext(null);
+
+async function withDoctorProfile(user, token) {
+    if (!user || user.role !== "doctor") {
+        return user;
+    }
+
+    try {
+        const profile = await getDoctorProfile(token);
+        return {
+            ...user,
+            profileCompleted: Boolean(profile?.profileCompleted),
+            approvalStatus: profile?.approvalStatus,
+            doctorProfileId: profile?.id
+        };
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 404) {
+            return {
+                ...user,
+                profileCompleted: false,
+                approvalStatus: null,
+                doctorProfileId: null
+            };
+        }
+
+        return {
+            ...user,
+            profileCompleted: Boolean(user.profileCompleted),
+            profileLookupFailed: true
+        };
+    }
+}
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(() => getStoredUser());
@@ -35,11 +68,12 @@ export function AuthProvider({ children }) {
 
             try {
                 const currentUser = await getCurrentUser(storedToken);
+                const enrichedUser = await withDoctorProfile(currentUser, storedToken);
                 if (cancelled) {
                     return;
                 }
-                saveSession(storedToken, currentUser);
-                setUser(currentUser);
+                saveSession(storedToken, enrichedUser);
+                setUser(enrichedUser);
                 setToken(storedToken);
             } catch {
                 if (cancelled) {
@@ -72,15 +106,28 @@ export function AuthProvider({ children }) {
         },
         async login(email, password) {
             const response = await loginUser({ email, password });
-            saveSession(response.token, response.user);
+            const enrichedUser = await withDoctorProfile(response.user, response.token);
+            saveSession(response.token, enrichedUser);
             setToken(response.token);
-            setUser(response.user);
-            return response.user;
+            setUser(enrichedUser);
+            return enrichedUser;
         },
         logout() {
             clearSession();
             setToken(null);
             setUser(null);
+        },
+        async refreshUser() {
+            const storedToken = getStoredToken();
+            if (!storedToken) {
+                return null;
+            }
+            const currentUser = await getCurrentUser(storedToken);
+            const enrichedUser = await withDoctorProfile(currentUser, storedToken);
+            saveSession(storedToken, enrichedUser);
+            setUser(enrichedUser);
+            setToken(storedToken);
+            return enrichedUser;
         },
         getDashboardPath
     }), [loading, token, user]);

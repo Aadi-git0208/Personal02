@@ -1,428 +1,214 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getApiErrorMessage, pageContent } from "../../api/client";
+import { listPatientAppointments } from "../../api/appointmentApi";
+import {
+    closeConversation,
+    createConversation,
+    listMessages,
+    markConversationRead,
+    reopenConversation,
+    sendMessage as sendChatMessage
+} from "../../api/chatApi";
+import { useAuth } from "../../auth/AuthContext";
 import "./ChatWithDoctor.css";
 
 function ChatWithDoctor() {
-    const patient =
-        JSON.parse(localStorage.getItem("currentUser")) || {};
-
+    const { user } = useAuth();
     const [doctors, setDoctors] = useState([]);
-    const [selectedDoctorId, setSelectedDoctorId] = useState("");
+    const [selectedAppointmentId, setSelectedAppointmentId] = useState("");
+    const [conversation, setConversation] = useState(null);
+    const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState("");
-
-    const [chats, setChats] = useState(() => {
-        try {
-            return (
-                JSON.parse(
-                    localStorage.getItem("chats")
-                ) || []
-            );
-        } catch {
-            return [];
-        }
-    });
+    const [loading, setLoading] = useState(true);
+    const [sending, setSending] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!patient?.id) return;
+        let cancelled = false;
 
-        const loadDoctors = () => {
+        async function loadDoctors() {
+            setLoading(true);
+            setError("");
             try {
-                const appointments =
-                    JSON.parse(
-                        localStorage.getItem("appointments")
-                    ) || [];
-
-                const patientAppointments =
-                    appointments.filter(
-                        (app) =>
-                            app.patientId === patient.id
-                    );
-
-                const doctorIds = new Set();
-                const doctorMap = new Map();
-
-                patientAppointments.forEach((app) => {
-                    const doctorId =
-                        app.doctorId ||
-                        app.doctorUserId;
-
-                    const doctorUserId =
-                        app.doctorUserId ||
-                        app.doctorId;
-
-                    const uniqueKey = `${doctorId}-${doctorUserId}`;
-
-                    if (
-                        doctorId &&
-                        !doctorIds.has(uniqueKey)
-                    ) {
-                        doctorIds.add(uniqueKey);
-
-                        doctorMap.set(uniqueKey, {
-                            id: doctorId,
-                            userId: doctorUserId,
-                            name:
-                                app.doctorName ||
-                                "Unknown Doctor",
-                            appointmentDoctorId:
-                                app.doctorId,
-                            appointmentDoctorUserId:
-                                app.doctorUserId
+                const page = await listPatientAppointments({ size: 50, sort: "appointmentDate,desc" });
+                const appointments = pageContent(page);
+                const unique = [];
+                const seen = new Set();
+                appointments.forEach((appointment) => {
+                    if (appointment.status === "CANCELLED" || appointment.status === "REJECTED") {
+                        return;
+                    }
+                    const key = String(appointment.doctorProfileId);
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        unique.push({
+                            appointmentId: appointment.id,
+                            doctorProfileId: appointment.doctorProfileId,
+                            doctorUserId: appointment.doctorUserId,
+                            name: appointment.doctorFullName || `Doctor #${appointment.doctorUserId}`
                         });
                     }
                 });
-
-                const doctorProfiles =
-                    JSON.parse(
-                        localStorage.getItem(
-                            "doctorProfiles"
-                        )
-                    ) || [];
-
-                doctorProfiles.forEach((profile) => {
-                    const existing =
-                        doctorMap.get(profile.id) ||
-                        doctorMap.get(profile.userId);
-
-                    if (existing) {
-                        doctorMap.set(
-                            profile.id ||
-                                profile.userId,
-                            {
-                                ...existing,
-                                name:
-                                    profile.name ||
-                                    existing.name,
-                                id:
-                                    profile.id ||
-                                    profile.userId,
-                                userId:
-                                    profile.userId ||
-                                    profile.id
-                            }
-                        );
-                    }
-                });
-
-                setDoctors(
-                    Array.from(doctorMap.values())
-                );
-            } catch (error) {
-                console.error(
-                    "Error loading doctors:",
-                    error
-                );
+                if (!cancelled) {
+                    setDoctors(unique);
+                }
+            } catch (loadError) {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(loadError));
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
-        };
+        }
 
         loadDoctors();
-
-        const interval = setInterval(
-            loadDoctors,
-            1000
-        );
-
-        window.addEventListener(
-            "storage",
-            loadDoctors
-        );
-
         return () => {
-            clearInterval(interval);
-
-            window.removeEventListener(
-                "storage",
-                loadDoctors
-            );
-        };
-    }, [patient?.id]);
-
-    const selectedDoctor = doctors.find(
-        (doctor) =>
-            doctor.id === selectedDoctorId ||
-            doctor.userId === selectedDoctorId
-    );
-
-    useEffect(() => {
-        const loadChats = () => {
-            try {
-                const stored =
-                    JSON.parse(
-                        localStorage.getItem("chats")
-                    ) || [];
-
-                setChats(stored);
-            } catch (error) {
-                console.error(
-                    "Error loading chats:",
-                    error
-                );
-            }
-        };
-
-        loadChats();
-
-        const interval = setInterval(
-            loadChats,
-            1000
-        );
-
-        window.addEventListener(
-            "storage",
-            loadChats
-        );
-
-        return () => {
-            clearInterval(interval);
-
-            window.removeEventListener(
-                "storage",
-                loadChats
-            );
+            cancelled = true;
         };
     }, []);
 
-    const messages =
-        selectedDoctor && patient?.id
-            ? chats
-                  .filter((msg) => {
-                      const matchesPatient =
-                          msg.patientId ===
-                          patient.id;
+    const selectedDoctor = useMemo(
+        () => doctors.find((doctor) => String(doctor.appointmentId) === String(selectedAppointmentId)),
+        [doctors, selectedAppointmentId]
+    );
 
-                      const matchesDoctor =
-                          msg.doctorId ===
-                              selectedDoctor.id ||
-                          msg.doctorId ===
-                              selectedDoctor.userId ||
-                          msg.doctorUserId ===
-                              selectedDoctor.id ||
-                          msg.doctorUserId ===
-                              selectedDoctor.userId;
+    useEffect(() => {
+        if (!selectedDoctor) {
+            setConversation(null);
+            setMessages([]);
+            return undefined;
+        }
 
-                      return (
-                          matchesPatient &&
-                          matchesDoctor
-                      );
-                  })
-                  .sort((a, b) => {
-                      const timeA =
-                          a.timestamp ||
-                          a.time ||
-                          "";
+        let cancelled = false;
 
-                      const timeB =
-                          b.timestamp ||
-                          b.time ||
-                          "";
+        async function openConversation() {
+            setError("");
+            try {
+                const created = await createConversation({ appointmentId: selectedDoctor.appointmentId });
+                if (cancelled) {
+                    return;
+                }
+                setConversation(created);
+                const page = await listMessages(created.id, { size: 50, sort: "createdAt,asc" });
+                if (!cancelled) {
+                    setMessages(pageContent(page));
+                }
+                await markConversationRead(created.id);
+            } catch (openError) {
+                if (!cancelled) {
+                    setError(getApiErrorMessage(openError));
+                    setConversation(null);
+                    setMessages([]);
+                }
+            }
+        }
 
-                      return timeA.localeCompare(
-                          timeB
-                      );
-                  })
-            : [];
+        openConversation();
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedDoctor]);
 
-    const sendMessage = () => {
-        if (
-            !message.trim() ||
-            !selectedDoctor ||
-            !patient?.id
-        ) {
+    async function sendMessage() {
+        if (!message.trim() || !conversation?.id) {
             return;
         }
 
-        const doctorProfiles =
-            JSON.parse(
-                localStorage.getItem(
-                    "doctorProfiles"
-                )
-            ) || [];
+        setSending(true);
+        setError("");
+        try {
+            const created = await sendChatMessage(conversation.id, message.trim());
+            setMessages((current) => [...current, created]);
+            setMessage("");
+        } catch (sendError) {
+            setError(getApiErrorMessage(sendError));
+        } finally {
+            setSending(false);
+        }
+    }
 
-        const doctorProfile =
-            doctorProfiles.find(
-                (profile) =>
-                    profile.id ===
-                        selectedDoctor.id ||
-                    profile.id ===
-                        selectedDoctor.userId ||
-                    profile.userId ===
-                        selectedDoctor.id ||
-                    profile.userId ===
-                        selectedDoctor.userId ||
-                    profile.id ===
-                        selectedDoctor.appointmentDoctorId ||
-                    profile.userId ===
-                        selectedDoctor.appointmentDoctorUserId
-            );
-
-        const doctorId =
-            selectedDoctor.appointmentDoctorId ||
-            selectedDoctor.id ||
-            doctorProfile?.id ||
-            selectedDoctor.userId;
-
-        const doctorUserId =
-            selectedDoctor.appointmentDoctorUserId ||
-            selectedDoctor.userId ||
-            doctorProfile?.userId ||
-            doctorProfile?.id ||
-            selectedDoctor.id;
-
-        const newMessage = {
-            id: crypto.randomUUID(),
-            from: "patient",
-            to: "doctor",
-            patientId: patient.id,
-            patientName:
-                patient.name || "Patient",
-            doctorId: doctorId,
-            doctorUserId: doctorUserId,
-            doctorName:
-                selectedDoctor.name,
-            message: message.trim(),
-            time: new Date().toLocaleTimeString(),
-            timestamp:
-                new Date().toISOString()
-        };
-
-        const updatedChats = [
-            ...chats,
-            newMessage
-        ];
-
-        localStorage.setItem(
-            "chats",
-            JSON.stringify(updatedChats)
-        );
-
-        setChats(updatedChats);
-        setMessage("");
-
-        window.dispatchEvent(
-            new Event("storage")
-        );
-    };
+    async function toggleConversation() {
+        if (!conversation?.id) {
+            return;
+        }
+        try {
+            const updated = conversation.status === "CLOSED"
+                ? await reopenConversation(conversation.id)
+                : await closeConversation(conversation.id);
+            setConversation(updated);
+        } catch (toggleError) {
+            setError(getApiErrorMessage(toggleError));
+        }
+    }
 
     return (
         <div className="chat-container">
-            <h2 className="chat-title">
-                Chat with Doctor
-            </h2>
+            <h2 className="chat-title">Chat with Doctor</h2>
+            {error && <p role="alert">{error}</p>}
+            {loading && <p>Loading conversations...</p>}
 
-            {doctors.length === 0 ? (
+            {!loading && doctors.length === 0 ? (
                 <div className="no-doctors-chat">
-                    <p>
-                        No doctors available.
-                        Please book an appointment
-                        first.
-                    </p>
+                    <p>No doctors available. Please book an appointment first.</p>
                 </div>
             ) : (
                 <select
                     className="doctor-select"
-                    value={selectedDoctorId}
-                    onChange={(event) =>
-                        setSelectedDoctorId(
-                            event.target.value
-                        )
-                    }
+                    value={selectedAppointmentId}
+                    onChange={(event) => setSelectedAppointmentId(event.target.value)}
                 >
-                    <option value="">
-                        Select Doctor
-                    </option>
-
+                    <option value="">Select Doctor</option>
                     {doctors.map((doctor) => (
-                        <option
-                            key={
-                                doctor.id ||
-                                doctor.userId
-                            }
-                            value={
-                                doctor.id ||
-                                doctor.userId
-                            }
-                        >
+                        <option key={doctor.appointmentId} value={doctor.appointmentId}>
                             {doctor.name}
                         </option>
                     ))}
                 </select>
             )}
 
-            {selectedDoctor && (
+            {selectedDoctor && conversation && (
                 <div className="chat-box">
+                    <p>
+                        {conversation.status === "CLOSED" ? "This conversation is closed." : "Conversation is open."}
+                        <button type="button" onClick={toggleConversation}>
+                            {conversation.status === "CLOSED" ? "Reopen" : "Close"}
+                        </button>
+                    </p>
                     <div className="messages">
                         {messages.length === 0 && (
-                            <p className="empty">
-                                No messages yet
-                            </p>
+                            <p className="empty">No messages yet</p>
                         )}
-
                         {messages.map((msg) => (
                             <div
                                 key={msg.id}
-                                className={`message ${
-                                    msg.from ===
-                                    "patient"
-                                        ? "patient"
-                                        : "doctor"
-                                }`}
+                                className={`message ${String(msg.senderUserId) === String(user?.id) ? "patient" : "doctor"}`}
                             >
-                                <span>
-                                    {msg.message}
-                                </span>
-
-                                <small>
-                                    {msg.time}
-                                </small>
+                                <span>{msg.body}</span>
+                                <small>{msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : ""}</small>
                             </div>
                         ))}
-
-                        {messages.length > 0 && (
-                            <div
-                                ref={(element) => {
-                                    if (element) {
-                                        setTimeout(
-                                            () =>
-                                                element.scrollIntoView(
-                                                    {
-                                                        behavior:
-                                                            "smooth"
-                                                    }
-                                                ),
-                                            100
-                                        );
-                                    }
-                                }}
-                            />
-                        )}
                     </div>
-
                     <div className="chat-input">
                         <input
                             type="text"
                             placeholder="Type your message..."
                             value={message}
-                            onChange={(event) =>
-                                setMessage(
-                                    event.target.value
-                                )
-                            }
+                            disabled={sending || conversation.status === "CLOSED"}
+                            onChange={(event) => setMessage(event.target.value)}
                             onKeyDown={(event) => {
-                                if (
-                                    event.key ===
-                                        "Enter" &&
-                                    !event.shiftKey
-                                ) {
+                                if (event.key === "Enter" && !event.shiftKey) {
                                     event.preventDefault();
                                     sendMessage();
                                 }
                             }}
                         />
-
                         <button
                             onClick={sendMessage}
-                            disabled={!message.trim()}
+                            disabled={!message.trim() || sending || conversation.status === "CLOSED"}
                         >
-                            Send
+                            {sending ? "Sending..." : "Send"}
                         </button>
                     </div>
                 </div>
